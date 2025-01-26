@@ -1,0 +1,762 @@
+openapi: 3.0.3
+
+info:
+  title: Voting Service
+  description: |-
+    Документация API
+  version: v1
+
+tags:
+  - name: Authentication
+    description: Аутентификация пользователя
+  - name: VoteManaging
+    description: Управление голосованиями
+  - name: Voting
+    description: Голосование
+  - name: FrontEnd
+    description: Клиентская часть
+  - name: Cryptography
+    description: Крипитография
+  - name: VoteResult
+    description: Результаты голосования
+
+paths:
+  /api/v1/register:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация
+      description: Регистрация нового пользователя
+      operationId: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        200:
+          description: Регистрация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Некорректные параметры запроса
+        409:
+          description: Пользователь с таким логином уже существует
+  /api/v1/login:
+    post:
+      tags:
+        - Authentication
+      summary: Авторизация
+      description: Авторизация существующего пользователя
+      operationId: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Регистрация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/votes:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Создание голосования
+      description: Создание нового голосования
+      operationId: CreateVote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrEditVoteRequest'
+      responses:
+        201:
+          description: Голосование создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Просмотр всех созданных голосований
+      description: Просмотр всех созданных голосований
+      operationId: GetCreatedVotes
+      responses:
+        200:
+          description: Созданные голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/votes/{voteId}:
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Просмотр созданного голосования
+      description: Просмотр созданного голосования
+      operationId: GetCreatedVote
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Созданное голосование
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+    put:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Редактирование созданного голосования
+      description: Редактирование созданного голосования
+      operationId: EditCreatedVote
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrEditVoteRequest'
+      responses:
+        200:
+          description: Созданные голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/vote-requests/vote:
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Просмотр неотвеченных запросов на право голосовать
+      description: Просмотр неотвеченных запросов на право голосовать
+      operationId: GetVoteRequests
+      responses:
+        200:
+          description: Неотвеченные запросы на просмотр голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchOrVoteRequestResponse'
+        400:
+          description: Некорректные параметры запроса
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Ответ на запросы на право голосовать
+      description: Ответ на запросы на право голосовать
+      operationId: AnswerVoteRequests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerForWatchOrVoteRequestResponse'
+      responses:
+        200:
+          description: Изменения сохранены
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/vote-requests/watch:
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteManaging
+      summary: Просмотр неотвеченных запросов на право наблюдать за голосованием
+      description: Просмотр неотвеченных запросов на право наблюдать за голосованием
+      operationId: GetWatchRequests
+      responses:
+        200:
+          description: Неотвеченные запросы на просмотр голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchOrVoteRequestResponse'
+        400:
+          description: Некорректные параметры запроса
+    post:
+      tags:
+        - VoteManaging
+      summary: Ответ на запросы на право наблюдать за голосованием
+      description: Ответ на запросы на право наблюдать за голосованием
+      operationId: AnswerWatchRequests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerForWatchOrVoteRequestResponse'
+      responses:
+        200:
+          description: Изменения сохранены
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes:
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Voting
+      summary: Просмотр всех голосований
+      description: Просмотр всех голосований
+      operationId: GetVotes
+      parameters:
+        - in: query
+          name: VoteFilter
+          schema:
+            $ref: '#/components/schemas/VoteFilter'
+      responses:
+        200:
+          description: Голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}:
+    get:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Voting
+      summary: Просмотр голосования
+      description: Просмотр голосования
+      operationId: GetVote
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Голосование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/request/vote:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Voting
+      summary: Запрос на право голосовать
+      description: Запрос на право голосовать
+      operationId: RequestForVoting
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/request/watch:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Voting
+      summary: Запрос на право наблюдать за голосованием
+      description: Запрос на право наблюдать за голосованием
+      operationId: RequestForWatching
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/getSignature:
+    post:
+      tags:
+        - FrontEnd
+      summary: Получение подописи для голосования
+      description: Получение подописи для голосования
+      operationId: GetSignature
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/sign:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Cryptography
+      summary: Подпись ключа для голосования
+      description: Подпись ключа для голосования
+      operationId: Sign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignRequest'
+      responses:
+        200:
+          description: Регистрация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/publicKey:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Cryptography
+      summary: Получение публичного ключа системы
+      description: Получение публичного ключа системы
+      operationId: GetSystemPublicKey
+      responses:
+        200:
+          description: Регистрация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicKeyResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/zeroKnowledgeProof:
+    post:
+      tags:
+        - FrontEnd
+      summary: Генерация доказательства с нулевым разглашением для голосования
+      description: Генерация доказательства с нулевым разглашением для голосования
+      operationId: GetZeroKnowledgeProof
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: encryptedVote
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/vote:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - Voting
+      summary: Голосование
+      description: Голосование
+      operationId: Vote
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Голос принят системой
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/checkVote:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteResult
+      summary: Проверка голоса в системе
+      description: Проверка голоса в системе
+      operationId: CheckVote
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckVoteRequest'
+      responses:
+        200:
+          description: Запись в блокчейне о голосе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/checkAllVotes:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteResult
+      summary: Проверка всех голосов в системе
+      description: Проверка всех голосов в системе. Доступна только наблюдателям
+      operationId: CheckAllVotes
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CheckVoteRequest'
+      responses:
+        200:
+          description: Запись в блокчейне о голосе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votes/{voteId}/results:
+    post:
+      security:
+        - BearerAuth: [ ]
+      tags:
+        - VoteResult
+      summary: Результаты голосования
+      description: Результаты голосования
+      operationId: CheckVoteResults
+      parameters:
+        - in: path
+          name: voteId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запись в блокчейне о голосе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVoteResultsResponse'
+        400:
+          description: Некорректные параметры запроса
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+      required:
+        - email
+        - password
+        - name
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+    CreateOrEditVoteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+      required:
+        - name
+        - question
+        - answers
+        - startDate
+        - endDate
+    GetVoteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - question
+        - answers
+        - startDate
+        - endDate
+    Answer:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+    WatchOrVoteRequestResponse:
+      type: object
+      properties:
+        voteId:
+          type: string
+        voteName:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        userEmail:
+          type: string
+        requestDate:
+          type: string
+          format: date-time
+      required:
+        - voteId
+        - voteName
+        - userId
+        - userName
+        - userEmail
+        - requestDate
+    AnswerForWatchOrVoteRequestResponse:
+      type: object
+      properties:
+        voteId:
+          type: string
+        approve:
+          type: array
+          items:
+            type: string
+        reject:
+          type: array
+          items:
+            type: string
+      required:
+        - voteId
+        - approve
+        - reject
+    VoteFilter:
+      type: object
+      properties:
+        approvedForWatching:
+          type: boolean
+        approvedForVoting:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/VoteStatus'
+    VoteStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - IN_PROGRESS
+        - FINISHED
+    SignRequest:
+      type: object
+      properties:
+        blindedPublicKey:
+          type: string
+      required:
+        - blindedPublicKey
+    SignResponse:
+      type: object
+      properties:
+        blindSignature:
+          type: string
+      required:
+        - blindSignature
+    PublicKeyResponse:
+      type: object
+      properties:
+        publicKey:
+          type: string
+      required:
+        - publicKey
+    VoteRequest:
+      type: object
+      properties:
+        signedPublicKey:
+          type: string
+        encryptedVote:
+          type: string
+        zeroKnowledgeProof:
+          type: string
+      required:
+        - blindedPublicKey
+        - encryptedVote
+        - zeroKnowledgeProof
+    VoteResponse:
+      type: object
+      properties:
+        voteToken:
+          type: string
+      required:
+        - voteToken
+    CheckVoteRequest:
+      type: object
+      properties:
+        voteToken:
+          type: string
+      required:
+        - voteToken
+    CheckVoteResponse:
+      type: object
+      properties:
+        voteId:
+          type: string
+        userId:
+          type: string
+        voteToken:
+          type: string
+        encryptedVote:
+          type: string
+        zeroKnowledgeProof:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        blockHash:
+          type: string
+      required:
+        - voteId
+        - userId
+        - voteToken
+        - encryptedVote
+        - zeroKnowledgeProof
+        - timestamp
+        - blockHash
+    CheckVoteResultsResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/VoteStatus'
+        voteId:
+          type: string
+        voteName:
+          type: string
+        results:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - status
+        - voteId
+        - voteName
