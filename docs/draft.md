@@ -40,7 +40,7 @@ ____________________________
   - /me GET
   - /register POST
   - /login POST
-### GRPC
+### gRPC
   - /check 
 ### DB
   - user (id, login, password)
@@ -82,10 +82,10 @@ ____________________________
   - /checkZkProof
 
 ## blockchain-service
-### REST
+### gRPC
   - /save POST
   - /voting GET (by token)
-  - /voting/block (by token)
+  - /voting/block GET (by token)
 ### DB
   - blockchain
 

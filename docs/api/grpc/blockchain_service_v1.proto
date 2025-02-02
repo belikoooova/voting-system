@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package ru.belikoooova.voting.system.grpc.v1;
+
+option java_package = "ru.belikoooova.voting.system.grpc.v1";
+
+import "google/protobuf/empty.proto";
+
+service BlockchainService {
+  rpc SaveVote(SaveVoteRequest) returns (SaveVoteResponse);
+  rpc GetBlock(GetBlockRequest) returns (GetBlockResponse);
+  rpc GetAllBlocks(google.protobuf.Empty) returns (GetAllBlocksResponse);
+}
+
+message SaveVoteRequest {
+  string voteId = 1;
+  string userId = 2;
+  string encryptedVote = 3;
+  string zeroKnowledgeProof = 4;
+  int64 timestamp = 5;
+}
+
+message SaveVoteResponse {
+  string voteToken = 1;
+}
+
+message GetBlockRequest {
+  string voteToken = 1;
+}
+
+message GetBlockResponse {
+  string voteId = 1;
+  string userId = 2;
+  string voteToken = 3;
+  string encryptedVote = 4;
+  string zeroKnowledgeProof = 5;
+  string timestamp = 6;
+  string blockHash = 7;
+}
+
+message GetAllBlocksResponse {
+  repeated GetBlockResponse blocks = 1;
+}
