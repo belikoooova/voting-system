@@ -1,0 +1,24 @@
+---
+databaseChangeLog:
+  - include:
+      file: user.sql
+      relativeToChangelogFile: true
+  - include:
+      file: voting.sql
+      relativeToChangelogFile: true
+  - include:
+      file: answer.sql
+      relativeToChangelogFile: true
+  - include:
+      file: vote_permission.sql
+      relativeToChangelogFile: true
+  - include:
+      file: watch_permission.sql
+      relativeToChangelogFile: true
+  - changeSet:
+      id: 1.0.0
+      author: Maria Belikova
+      logicalFilePath: 1.0.0/db.changelog.yaml
+      changes:
+        - tagDatabase:
+            tag: 1.0.0
