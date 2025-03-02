@@ -3,18 +3,22 @@
 
 create table "user"
 (
-    id                     uuid         not null default gen_random_uuid()
+    id              uuid         not null default gen_random_uuid()
         constraint pk_user primary key,
-    email                  varchar(255) not null,
-    password               varchar(255) not null,
-    created_at                      timestamp       not null,
-    last_updated_at                 timestamp       not null
+    email           varchar(255) not null,
+    password        varchar(255) not null,
+    username        varchar(255) not null,
+    is_legal        bool         not null,
+    created_at      timestamp    not null,
+    last_updated_at timestamp    not null
 );
 
 comment on table "user" is 'Пользователь';
 comment on column "user".id is 'Идентификатор';
 comment on column "user".email is 'Электронная почта';
 comment on column "user".password is 'Пароль';
+comment on column "user".username is 'Имя пользователя';
+comment on column "user".is_legal is 'Является ли аккаунт юридическим лицом';
 comment on column "user".created_at is 'Время создания записи';
 comment on column "user".last_updated_at is 'Время последнего обновления записи';
 
