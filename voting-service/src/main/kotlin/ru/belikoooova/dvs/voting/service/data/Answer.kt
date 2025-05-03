@@ -1,5 +1,6 @@
 package ru.belikoooova.dvs.voting.service.data
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
@@ -14,6 +15,7 @@ class Answer(
     @Id
     @JvmField
     val id: UUID? = null,
+    @Column(name = "voting_id")
     val votingId: UUID,
     val optionText: String,
     val createdAt: Instant = Instant.now(),

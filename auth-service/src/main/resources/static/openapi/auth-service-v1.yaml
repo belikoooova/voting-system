@@ -11,7 +11,7 @@ tags:
     description: Аутентификация
 
 paths:
-  /api/v1/register:
+  /auth/api/v1/register:
     post:
       tags:
         - Authentication
@@ -33,7 +33,7 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/login:
+  /auth/api/v1/login:
     post:
       tags:
         - Authentication
@@ -55,7 +55,7 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/me:
+  /auth/api/v1/me:
     get:
       tags:
         - Authentication

@@ -5,7 +5,7 @@ create table vote_permission
 (
     id              uuid         not null default gen_random_uuid()
         constraint pk_vote_permission primary key,
-    user_id         uuid         not null references "user" (id),
+    user_id         uuid         not null,
     voting_id       uuid         not null references voting (id),
     status          text         not null
         constraint ch_vote_permission_status check (status in ('REQUESTED', 'ACCEPTED', 'REJECTED')),

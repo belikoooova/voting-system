@@ -15,7 +15,7 @@ tags:
     description: Результаты голосования
 
 paths:
-  /api/v1/my/votings:
+  /voting/api/v1/my/votings:
     post:
       tags:
         - VotingManaging
@@ -68,7 +68,7 @@ paths:
                   $ref: '#/components/schemas/GetVotingResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/my/votings/{votingId}:
+  /voting/api/v1/my/votings/{votingId}:
     get:
       tags:
         - VotingManaging
@@ -152,7 +152,7 @@ paths:
           description: Голосование удалено
         400:
           description: Некорректные параметры запроса
-  /api/v1/my/votings/requests/vote:
+  /voting/api/v1/my/votings/requests/vote:
     get:
       tags:
         - VotingManaging
@@ -203,7 +203,7 @@ paths:
           description: Изменения сохранены
         400:
           description: Некорректные параметры запроса
-  /api/v1/my/votings/requests/watch:
+  /voting/api/v1/my/votings/requests/watch:
     get:
       tags:
         - VotingManaging
@@ -254,7 +254,7 @@ paths:
           description: Изменения сохранены
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings:
+  /voting/api/v1/votings:
     get:
       tags:
         - Voting
@@ -284,7 +284,7 @@ paths:
                   $ref: '#/components/schemas/GetVotingResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}:
+  /voting/api/v1/votings/{votingId}:
     get:
       tags:
         - Voting
@@ -312,7 +312,7 @@ paths:
                 $ref: '#/components/schemas/GetVotingResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/request/vote:
+  /voting/api/v1/votings/{votingId}/request/vote:
     post:
       tags:
         - Voting
@@ -336,7 +336,7 @@ paths:
           description: Запрос отправлен
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/request/watch:
+  /voting/api/v1/votings/{votingId}/request/watch:
     post:
       tags:
         - Voting
@@ -360,7 +360,7 @@ paths:
           description: Запрос отправлен
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/vote:
+  /voting/api/v1/votings/{votingId}/vote:
     post:
       tags:
         - Voting
@@ -400,7 +400,7 @@ paths:
                 $ref: '#/components/schemas/VotingTokenResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/checkVote:
+  /voting/api/v1/votings/{votingId}/checkVote:
     post:
       tags:
         - VotingResult
@@ -434,7 +434,7 @@ paths:
                 $ref: '#/components/schemas/CheckVoteResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/checkAllVotes:
+  /voting/api/v1/votings/{votingId}/checkAllVotes:
     post:
       tags:
         - VotingResult
@@ -464,7 +464,7 @@ paths:
                   $ref: '#/components/schemas/CheckVoteResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votings/{votingId}/results:
+  /voting/api/v1/votings/{votingId}/results:
     post:
       tags:
         - VotingResult

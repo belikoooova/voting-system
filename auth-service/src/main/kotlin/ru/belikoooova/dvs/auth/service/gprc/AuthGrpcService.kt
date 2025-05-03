@@ -35,7 +35,7 @@ class AuthGrpcService(
 
         lateinit var ok: OkHttpResponse
         val path = request.attributes.request?.http?.path!!
-        if (path.contains("/vote") or path.contains("/getToken") or path.contains("/checkVote")) {
+        if (path.contains("/vote") and !path.contains("/request") or path.contains("/checkVote")) {
             val (isAccepted, voteToken) = votingGrpcClient.checkVotePermission(
                 path.extractVotingId(),
                 userId

@@ -7,14 +7,18 @@ import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.DefaultGasProvider
+import org.web3j.tx.gas.StaticGasProvider
 import ru.belikoooova.dvs.blockchain.service.contract.VoteContract
+import java.math.BigInteger
 
 @Configuration
 class BlockchainConfig(private val props: BlockchainProperties) {
 
     @Bean
-    fun web3j(): Web3j =
-        Web3j.build(HttpService(props.rpcUrl))
+    fun web3j(): Web3j {
+        System.setProperty("org.web3j.ens.enabled", "false")
+        return Web3j.build(HttpService(props.rpcUrl))
+    }
 
     @Bean
     fun credentials(): Credentials =
@@ -22,12 +26,12 @@ class BlockchainConfig(private val props: BlockchainProperties) {
 
     @Bean
     fun voteContract(web3j: Web3j, credentials: Credentials): VoteContract {
-        val address = props.contractAddress.ifBlank {
-            val receipt = VoteContract.deploy(web3j, credentials, DefaultGasProvider()).send()
-            props.contractAddress = receipt.contractAddress
-            receipt.contractAddress
-        }
-        return VoteContract.load(address, web3j, credentials, DefaultGasProvider())
+        return VoteContract.load(
+            props.contractAddress,
+            web3j,
+            credentials,
+            DefaultGasProvider()
+        )
     }
 }
 

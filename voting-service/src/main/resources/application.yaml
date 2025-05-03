@@ -1,11 +1,28 @@
 spring:
   application:
     name: voting-service
+  liquibase:
+    url: jdbc:postgresql://postgres:5432/voting
+    user: voting_liquibase
+    password: voting_liquibase
+  datasource:
+    url: jdbc:postgresql://postgres:5432/voting
+    username: voting
+    password: voting
 
 grpc:
   client:
     auth-client:
-      address: static://localhost:9090
+      address: static://auth-service:9090
+      negotiation-type: plaintext
+    blockchain-client:
+      address: static://blockchain-service:9090
+      negotiation-type: plaintext
+    crypto-client:
+      address: static://crypto-service:9090
       negotiation-type: plaintext
   server:
-    port: 9091
+    port: 9090
+
+server:
+  port: 8080

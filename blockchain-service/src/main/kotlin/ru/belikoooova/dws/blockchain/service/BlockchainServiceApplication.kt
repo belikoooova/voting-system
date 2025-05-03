@@ -9,5 +9,6 @@ import org.springframework.boot.runApplication
 class BlockchainServiceApplication
 
 fun main(args: Array<String>) {
+    System.setProperty("org.web3j.ens.enabled", "false")
     runApplication<BlockchainServiceApplication>(*args)
 }

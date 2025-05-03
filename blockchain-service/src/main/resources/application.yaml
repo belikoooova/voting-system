@@ -2,7 +2,11 @@ spring:
   application:
     name: blockchain-service
 
+grpc:
+  server:
+    port: 9090
+
 blockchain:
-  rpc-url: ""
-  private-key: ""
-  contract-address: ""
+  rpc-url: http://ganache:8545
+  private-key: ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+  contract-address: "0x5fbdb2315678afecb367f032d93f642f64180aa3"

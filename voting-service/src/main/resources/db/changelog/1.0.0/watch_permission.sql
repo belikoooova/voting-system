@@ -5,7 +5,7 @@ create table watch_permission
 (
     id              uuid      not null default gen_random_uuid()
         constraint pk_watch_permission primary key,
-    user_id         uuid      not null references "user" (id),
+    user_id         uuid      not null,
     voting_id       uuid      not null references voting (id),
     status          text      not null
         constraint ch_watch_permission_status check (status in ('REQUESTED', 'ACCEPTED', 'REJECTED')),

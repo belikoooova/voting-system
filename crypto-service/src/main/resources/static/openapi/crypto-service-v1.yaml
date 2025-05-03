@@ -11,7 +11,7 @@ tags:
     description: Шифрование, проверка, подпись
 
 paths:
-  /api/v1/sign:
+  /crypto/api/v1/sign:
     post:
       tags:
         - Cryptography
@@ -40,7 +40,7 @@ paths:
                 $ref: '#/components/schemas/SignResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/publicKey:
+  /crypto/api/v1/publicKey:
     get:
       tags:
         - Cryptography
@@ -63,7 +63,7 @@ paths:
                 $ref: '#/components/schemas/PublicKeyResponse'
         400:
           description: Некорректные параметры запроса
-  /api/v1/votes/{voteId}/zeroKnowledgeProof:
+  /crypto/api/v1/votes/{voteId}/zeroKnowledgeProof:
     get:
       tags:
         - Cryptography

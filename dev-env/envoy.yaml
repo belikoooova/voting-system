@@ -22,18 +22,18 @@ static_resources:
                 route_config:
                   name: local_route
                   virtual_hosts:
-                    - name: auth_service_host
+                    - name: services_host
                       domains: ["*"]
                       cors:
                         allow_origin_string_match:
                           - prefix: "http://localhost:3000"
-                        allow_methods: "GET, POST, OPTIONS"
+                        allow_methods: "GET, POST, PUT, DELETE, OPTIONS"
                         allow_headers: "authorization,content-type"
-                        expose_headers: "X-User-Id"
+                        expose_headers: "X-User-Id,X-User-Vote-Token"
                         max_age: "3600"
                       routes:
                         - match:
-                            prefix: /api/v1/login
+                            prefix: /auth/api/v1/login
                           route:
                             cluster: auth_service_cluster
                           typed_per_filter_config:
@@ -41,7 +41,7 @@ static_resources:
                               "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute
                               disabled: true
                         - match:
-                            prefix: /api/v1/register
+                            prefix: /auth/api/v1/register
                           route:
                             cluster: auth_service_cluster
                           typed_per_filter_config:
@@ -49,9 +49,20 @@ static_resources:
                               "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute
                               disabled: true
                         - match:
-                            prefix: /api/v1/me
+                            prefix: /auth/api/v1/me
                           route:
                             cluster: auth_service_cluster
+
+                        - match:
+                            prefix: /voting
+                          route:
+                            cluster: voting_service_cluster
+
+                        - match:
+                            prefix: /crypto
+                          route:
+                            cluster: crypto_service_cluster
+
                 http_filters:
                   - name: envoy.filters.http.cors
                     typed_config:
@@ -84,7 +95,7 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
+                      address: auth-service
                       port_value: 9090
     - name: auth_service_cluster
       connect_timeout: 0.5s
@@ -97,5 +108,31 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
-                      port_value: 8081
+                      address: auth-service
+                      port_value: 8080
+    - name: voting_service_cluster
+      connect_timeout: 0.5s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: voting_service_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: voting-service
+                      port_value: 8080
+    - name: crypto_service_cluster
+      connect_timeout: 0.5s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: crypto_service_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: crypto-service
+                      port_value: 8080
