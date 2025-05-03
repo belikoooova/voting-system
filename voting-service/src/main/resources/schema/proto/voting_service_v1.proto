@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package ru.belikoooova.dvs.voting.service.grpc.v1;
+
+service VotingService {
+  rpc checkVotePermissionRequest(PermissionRequest) returns (VotePermissionResponse);
+  rpc checkWatchPermissionRequest(PermissionRequest) returns (WatchPermissionResponse);
+  rpc getAnswersForVoting(AnswersForVotingRequest) returns (AnswersForVotingResponse);
+}
+
+message PermissionRequest {
+  string userId = 1;
+  string voteId = 2;
+}
+
+message VotePermissionResponse {
+  bool isAccepted = 1;
+  string uniqueVoteToken = 2; // Если у пользователя действительно есть такое право, возвращается уникальный токен этого пользователя для этого голосования, используемый при создании ZKProof
+}
+
+message WatchPermissionResponse {
+  bool isAccepted = 1;
+}
+
+message AnswersForVotingRequest {
+  string voteId = 1;
+}
+
+message AnswersForVotingResponse {
+  repeated string answerId = 1;
+}

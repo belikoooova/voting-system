@@ -1,0 +1,714 @@
+openapi: 3.0.3
+
+info:
+  title: Voting Service
+  description: |-
+    Документация API
+  version: v1
+
+tags:
+  - name: VotingManaging
+    description: Управление голосованиями
+  - name: Voting
+    description: Голосование
+  - name: VotingResult
+    description: Результаты голосования
+
+paths:
+  /api/v1/my/votings:
+    post:
+      tags:
+        - VotingManaging
+      summary: Создание голосования
+      description: Создание нового голосования
+      operationId: CreateVoting
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrEditVotingRequest'
+      responses:
+        201:
+          description: Голосование создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+    get:
+      tags:
+        - VotingManaging
+      summary: Просмотр всех созданных голосований
+      description: Просмотр всех созданных голосований
+      operationId: GetCreatedVotings
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        200:
+          description: Созданные голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/votings/{votingId}:
+    get:
+      tags:
+        - VotingManaging
+      summary: Просмотр созданного голосования
+      description: Просмотр созданного голосования
+      operationId: GetCreatedVoting
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Созданное голосование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+    put:
+      tags:
+        - VotingManaging
+      summary: Редактирование созданного голосования
+      description: Редактирование созданного голосования
+      operationId: EditCreatedVoting
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrEditVotingRequest'
+      responses:
+        200:
+          description: Отредактированное голосование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+    delete:
+      tags:
+        - VotingManaging
+      summary: Удаление созданного голосования
+      description: Удаление созданного голосования
+      operationId: DeleteCreatedVoting
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Голосование удалено
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/votings/requests/vote:
+    get:
+      tags:
+        - VotingManaging
+      summary: Просмотр неотвеченных запросов на право голосовать
+      description: Просмотр неотвеченных запросов на право голосовать
+      operationId: GetVoteRequests
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        200:
+          description: Неотвеченные запросы на просмотр голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchOrVoteRequestResponse'
+        400:
+          description: Некорректные параметры запроса
+    post:
+      tags:
+        - VotingManaging
+      summary: Ответ на запросы на право голосовать
+      description: Ответ на запросы на право голосовать
+      operationId: AnswerVoteRequests
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnswerForWatchOrVoteRequestResponse'
+        required: true
+      responses:
+        200:
+          description: Изменения сохранены
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/my/votings/requests/watch:
+    get:
+      tags:
+        - VotingManaging
+      summary: Просмотр неотвеченных запросов на право наблюдать за голосованием
+      description: Просмотр неотвеченных запросов на право наблюдать за голосованием
+      operationId: GetWatchRequests
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        200:
+          description: Неотвеченные запросы на просмотр голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchOrVoteRequestResponse'
+        400:
+          description: Некорректные параметры запроса
+    post:
+      tags:
+        - VotingManaging
+      summary: Ответ на запросы на право наблюдать за голосованием
+      description: Ответ на запросы на право наблюдать за голосованием
+      operationId: AnswerWatchRequests
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnswerForWatchOrVoteRequestResponse'
+        required: true
+      responses:
+        200:
+          description: Изменения сохранены
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings:
+    get:
+      tags:
+        - Voting
+      summary: Просмотр всех голосований
+      description: Просмотр всех голосований
+      operationId: GetVotings
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: query
+          name: VotingFilter
+          schema:
+            $ref: '#/components/schemas/VotingFilter'
+          required: true
+      responses:
+        200:
+          description: Голосования
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}:
+    get:
+      tags:
+        - Voting
+      summary: Просмотр голосования
+      description: Просмотр голосования
+      operationId: GetVoting
+      parameters:
+        - in: header
+          name: X-User-Id
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Голосование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVotingResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/request/vote:
+    post:
+      tags:
+        - Voting
+      summary: Запрос на право голосовать
+      description: Запрос на право голосовать
+      operationId: RequestForVote
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/request/watch:
+    post:
+      tags:
+        - Voting
+      summary: Запрос на право наблюдать за голосованием
+      description: Запрос на право наблюдать за голосованием
+      operationId: RequestForWatch
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запрос отправлен
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/vote:
+    post:
+      tags:
+        - Voting
+      summary: Голосование
+      description: Голосование. Доступно только при начилии права голосовать
+      operationId: Vote
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: header
+          name: X-User-Vote-Token
+          required: true
+          schema:
+            type: string
+          description: ID пользователя
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteSubmissionRequest'
+      responses:
+        200:
+          description: Голос принят системой
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VotingTokenResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/checkVote:
+    post:
+      tags:
+        - VotingResult
+      summary: Проверка голоса в системе
+      description: Проверка голоса в системе. Доступно только при начилии права голосовать
+      operationId: CheckVote
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckVoteRequest'
+        required: true
+      responses:
+        200:
+          description: Запись в блокчейне о голосе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/checkAllVotes:
+    post:
+      tags:
+        - VotingResult
+      summary: Проверка всех голосов в системе
+      description: Проверка всех голосов в системе. Доступна только наблюдателям
+      operationId: CheckAllVotes
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Записи в блокчейне о голосах
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckVoteResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/votings/{votingId}/results:
+    post:
+      tags:
+        - VotingResult
+      summary: Результаты голосования
+      description: Результаты голосования
+      operationId: CheckVotingResults
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Запись в блокчейне о голосе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVotingResultsResponse'
+        400:
+          description: Некорректные параметры запроса
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CreateOrEditVotingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: integer
+          format: int64
+        endDate:
+          type: integer
+          format: int64
+      required:
+        - name
+        - description
+        - question
+        - answers
+        - startDate
+        - endDate
+    GetVotingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+        startDate:
+          type: integer
+          format: int64
+        endDate:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/VotingStatus'
+        votePermission:
+          $ref: '#/components/schemas/Permission'
+        watchPermission':
+          $ref: '#/components/schemas/Permission'
+      required:
+        - id
+        - name
+        - description
+        - question
+        - answers
+        - startDate
+        - endDate
+        - status
+    Answer:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+      required:
+        - id
+        - description
+    VotingStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - IN_PROGRESS
+        - FINISHED
+    Permission:
+      type: string
+      enum:
+        - CREATOR
+        - REQUESTED
+        - APPROVED
+        - REJECTED
+    WatchOrVoteRequestResponse:
+      type: object
+      properties:
+        permissionId:
+          type: string
+        voteId:
+          type: string
+        voteName:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        userEmail:
+          type: string
+        requestDate:
+          type: integer
+          format: int64
+      required:
+        - permissionId
+        - voteId
+        - voteName
+        - userId
+        - userName
+        - userEmail
+        - requestDate
+    AnswerForWatchOrVoteRequestResponse:
+      type: object
+      properties:
+        permissionId:
+          type: string
+        approve:
+          type: boolean
+      required:
+        - permissionId
+        - approve
+    VoteSubmissionRequest:
+      type: object
+      properties:
+        answerId:
+          type: string
+          description: Идентификатор выбранного варианта ответа
+        encryptedVote:
+          type: string
+          description: Зашифрованное голосование
+        zeroKnowledgeProof:
+          type: string
+          description: Доказательство с нулевым разглашением
+        signature:
+          type: string
+          description: Подпись
+      required:
+        - answerId
+        - encryptedVote
+        - zeroKnowledgeProof
+        - signature
+    VotingFilter:
+      type: object
+      properties:
+        approvedForWatching:
+          type: boolean
+        approvedForVoting:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/VotingStatus'
+    CheckVoteRequest:
+      type: object
+      properties:
+        voteToken:
+          type: string
+      required:
+        - voteToken
+    CheckVoteResponse:
+      type: object
+      properties:
+        voteId:
+          type: string
+        userId:
+          type: string
+        voteToken:
+          type: string
+        encryptedVote:
+          type: string
+        zeroKnowledgeProof:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        blockHash:
+          type: string
+      required:
+        - voteId
+        - userId
+        - voteToken
+        - encryptedVote
+        - zeroKnowledgeProof
+        - timestamp
+        - blockHash
+    CheckVotingResultsResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/VotingStatus'
+        voteId:
+          type: string
+        voteName:
+          type: string
+        results:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - status
+        - voteId
+        - voteName
+    VotingTokenResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/VoteStatus'
+        token:
+          type: string
+      required:
+        - status
+    VoteStatus:
+      type: string
+      enum:
+        - REJECTED
+        - IN_PROGRESS
+        - APPROVED

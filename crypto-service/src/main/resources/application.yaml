@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: crypto-service
+
+crypto:
+  public-key: |
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCJUAALDwEdTQ1lKKSIqjDq+fhJ
+    FKoFhKscOClXWYZABQZkZXzj9mKXo+kK+Y8QIaVZRdAvzLB9kd+GXsmR0EeD5+fe
+    O4A6fY3qJQw4TsFMzcZSm7ycJaAev6ADum9RtnizkSZUvQekFhXYQsrh1auwC93q
+    hq4sGCQ7ZfmGGBcv2QIDAQAB
+    -----END PUBLIC KEY-----
+  private-key: |
+    -----BEGIN PRIVATE KEY-----
+    MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAIlQAAsPAR1NDWUo
+    pIiqMOr5+EkUqgWEqxw4KVdZhkAFBmRlfOP2Ypej6Qr5jxAhpVlF0C/MsH2R34Ze
+    yZHQR4Pn5947gDp9jeolDDhOwUzNxlKbvJwloB6/oAO6b1G2eLORJlS9B6QWFdhC
+    yuHVq7AL3eqGriwYJDtl+YYYFy/ZAgMBAAECgYBTxRihpn+5jn5zjn4CWkIJuIJ+
+    ozqurydsyd5+ycEbYXVq3nd446F2far45RMgdkZX1j2SS8AIe2vwn/c9G+HkaVIT
+    kD6uSIw7zCUudmFquXKfCHvZSEKy0LNrUTiWAv+lVJ5Y9gNvfApidmk/lSQ3NQ5i
+    tFwutn62E3gi2d67YQJBAP99EvM+b+NNN74OfpSvbM7j8ne9gAH9QRWL2SlHzwWV
+    SJObt1YUgFfv4r3mZahIClBxP6UK9W+KQBIVhxdjw50CQQCJll3NwWkHD1qkWZ2i
+    QHsbNv4x77TB8O+LiRh35ukM0reUeOT1XDBB4cpveGeLcujdVjUtyamPdGSnaI8u
+    yp5tAkBiqQ4UWNwkTsFj530CNewyyNvtWYSBQCdOBr9Jra1IXqm0NsHJwAj/7GcH
+    Jl3Dam5xOgp11ZGKDT1Ivn94jNIRAkEAiRKxaafjBxGY8FwH2/n5q+dh4EY8A2wS
+    eyWepvX6ALh+BQFcucWankhg8iU2o4tbzAdy+6cJss326YIWBDwBEQJAG/xvcOH8
+    qAcPg0JSKlsdCSmdL0uIaCRkllgnS+teel5BMpA2Qz9aKW+7Rbin+/isDQHI3pBd
+    wo8OyjCFOwfnhQ==
+    -----END PRIVATE KEY-----

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package ru.belikoooova.dvs.crypto.service.grpc.v1;
+
+service CryptoService {
+  rpc checkSign(CheckSignRequest) returns (CheckResponse);
+  rpc checkZeroKnowledgeProof(CheckZeroKnowledgeProofRequest) returns (CheckResponse);
+  rpc decrypt(DecryptRequest) returns (DecryptResponse);
+}
+
+message CheckSignRequest {
+  string signedPublicKey = 1;
+  string originalMessage = 2;
+}
+
+message CheckResponse {
+  bool valid = 1;
+  string message = 2;
+}
+
+message CheckZeroKnowledgeProofRequest {
+  string encryptedVote = 1;
+  string zkProof = 2;
+}
+
+message DecryptRequest {
+  string encryptedVote = 1;
+}
+
+message DecryptResponse{
+  string answerId = 1;
+}

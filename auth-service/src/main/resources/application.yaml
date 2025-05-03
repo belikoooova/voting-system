@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: auth-service
+  liquibase:
+    url: jdbc:postgresql://localhost:5432/auth
+    user: auth_liquibase
+    password: auth_liquibase
+    test-rollback-on-update: on
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth
+    username: auth
+    password: auth
+
+server:
+  port: 8081
+
+jwt:
+  secret: my-very-secure-secret-key-that-is-long-enough
+  timeout-millis: 3600000
+
+grpc:
+  client:
+    voting-client:
+      address: static://localhost:9091
+      negotiation-type: plaintext
+  server:
+    port: 9090

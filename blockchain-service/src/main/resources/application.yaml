@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: blockchain-service
+
+blockchain:
+  rpc-url: ""
+  private-key: ""
+  contract-address: ""

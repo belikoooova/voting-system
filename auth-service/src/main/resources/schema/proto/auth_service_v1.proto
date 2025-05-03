@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package ru.belikoooova.dvs.auth.service.grpc.v1;
+
+service AuthService {
+  rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
+}
+
+message UserInfoRequest {
+  string id = 1;
+}
+
+message UserInfoResponse {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+}

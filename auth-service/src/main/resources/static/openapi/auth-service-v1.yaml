@@ -1,0 +1,126 @@
+openapi: 3.0.3
+
+info:
+  title: Auth Service
+  description: |-
+    Документация API
+  version: v1
+
+tags:
+  - name: Authentication
+    description: Аутентификация
+
+paths:
+  /api/v1/register:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация
+      description: Регистрация нового пользователя
+      operationId: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        200:
+          description: Регистрация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/login:
+    post:
+      tags:
+        - Authentication
+      summary: Авторизация
+      description: Авторизация существующего пользователя
+      operationId: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Авторизация успешна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Некорректные параметры запроса
+  /api/v1/me:
+    get:
+      tags:
+        - Authentication
+      summary: Просмотр информации о текущем пользователе
+      description: Просмотр информации о текущем пользователе
+      operationId: Me
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+      responses:
+        200:
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        400:
+          description: Некорректные параметры запроса
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        username:
+          type: string
+        isLegal:
+          type: boolean
+      required:
+        - email
+        - password
+        - username
+        - isLegal
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+    MeResponse:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        isLegal:
+          type: boolean
+      required:
+        - email
+        - username
+        - isLegal
