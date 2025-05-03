@@ -45,12 +45,12 @@ class VotingManagingController(
 
     override fun createVoting(
         xUserId: String,
-        createOrEditVotingRequest: CreateOrEditVotingRequest?
+        createOrEditVotingRequest: CreateOrEditVotingRequest
     ): ResponseEntity<GetVotingResponse> =
         ResponseEntity.ok(
             votingManagingService.createVoting(
                 UUID.fromString(xUserId),
-                createOrEditVotingRequest!!
+                createOrEditVotingRequest
             )
         )
 
@@ -65,13 +65,13 @@ class VotingManagingController(
     override fun editCreatedVoting(
         xUserId: String,
         votingId: String,
-        createOrEditVotingRequest: CreateOrEditVotingRequest?
+        createOrEditVotingRequest: CreateOrEditVotingRequest
     ): ResponseEntity<GetVotingResponse> =
         ResponseEntity.ok(
             votingManagingService.editVoting(
                 UUID.fromString(xUserId),
                 UUID.fromString(votingId),
-                createOrEditVotingRequest!!
+                createOrEditVotingRequest
             )
         )
 

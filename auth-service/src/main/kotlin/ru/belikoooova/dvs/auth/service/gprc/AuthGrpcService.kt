@@ -12,7 +12,7 @@ import net.devh.boot.grpc.server.service.GrpcService
 import ru.belikoooova.dvs.auth.service.service.JwtProvider
 
 @GrpcService
-class AuthGrpcServiceImpl(
+class AuthGrpcService(
     private val jwtProvider: JwtProvider,
     private val votingGrpcClient: VotingGrpcClient
 ) : AuthorizationGrpc.AuthorizationImplBase() {

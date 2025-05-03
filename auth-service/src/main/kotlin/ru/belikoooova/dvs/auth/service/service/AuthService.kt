@@ -1,9 +1,11 @@
 package ru.belikoooova.dvs.auth.service.service
 
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import ru.belikoooova.dvs.auth.service.api.v1.model.AuthResponse
 import ru.belikoooova.dvs.auth.service.api.v1.model.LoginRequest
 import ru.belikoooova.dvs.auth.service.api.v1.model.MeResponse
@@ -19,10 +21,9 @@ class AuthService(
 ) {
     private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
 
-    fun register(registerRequest: RegisterRequest?): ResponseEntity<AuthResponse> {
-        registerRequest ?: return ResponseEntity.badRequest().build()
+    fun register(registerRequest: RegisterRequest): ResponseEntity<AuthResponse> {
         if (userRepository.findByEmail(registerRequest.email).isPresent) {
-            return ResponseEntity.badRequest().build()
+            throw ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists")
         }
 
         val user = User(
@@ -38,16 +39,12 @@ class AuthService(
         return ResponseEntity.ok(AuthResponse(token))
     }
 
-    fun login(loginRequest: LoginRequest?): ResponseEntity<AuthResponse> {
-        loginRequest ?: return ResponseEntity.badRequest().build()
-        val optionalUser = userRepository.findByEmail(loginRequest.email) // todo?
-        if (optionalUser.isEmpty) {
-            return ResponseEntity.badRequest().build()
-        }
-        val user = optionalUser.get()
+    fun login(loginRequest: LoginRequest): ResponseEntity<AuthResponse> {
+        val user = userRepository.findByEmail(loginRequest.email)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password") }
 
         if (!passwordEncoder.matches(loginRequest.password, user.password)) {
-            return ResponseEntity.badRequest().build()
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password")
         }
 
         val token = jwtProvider.generateToken(user.id.toString())
@@ -55,11 +52,8 @@ class AuthService(
     }
 
     fun me(userId: UUID): ResponseEntity<MeResponse> {
-        val optionalUser = userRepository.findById(userId) // todo?
-        if (optionalUser.isEmpty) {
-            return ResponseEntity.badRequest().build()
-        }
-        val user = optionalUser.get()
+        val user = userRepository.findById(userId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "User not found") }
 
         return ResponseEntity.ok(
             MeResponse(

@@ -1,5 +1,7 @@
 package ru.belikoooova.dvs.voting.service.service
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import ru.belikoooova.dvs.blockchain.service.grpc.v1.BlockchainServiceV1
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteRequest
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteResponse
@@ -18,22 +20,37 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
         userId: UUID,
         votingId: UUID,
         checkVoteRequest: CheckVoteRequest
-    ): CheckVoteResponse =
-        blockchainGrpcClient.getBlock(checkVoteRequest.voteToken).mapToRest()
+    ): CheckVoteResponse {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        val block = blockchainGrpcClient.getBlock(checkVoteRequest.voteToken)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Vote not found")
+
+        return block.mapToRest()
+    }
 
     fun checkAllVotes(
         userId: UUID,
         votingId: UUID
-    ): List<CheckVoteResponse> =
-        blockchainGrpcClient.getAllBlocks(votingId = votingId.toString()).map {
-            it.mapToRest()
+    ): List<CheckVoteResponse> {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        val blocks = blockchainGrpcClient.getAllBlocks(votingId.toString())
+        if (blocks.isEmpty()) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No votes found for this voting")
         }
+
+        return blocks.map { it.mapToRest() }
+    }
 
     fun checkVotingResults(
         userId: UUID,
         votingId: UUID
     ): CheckVotingResultsResponse {
-        val voting = votingRepository.findById(votingId).get()
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
 
         val now = Instant.now()
         val status = when {
@@ -52,6 +69,9 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
         }
 
         val allBlocks = blockchainGrpcClient.getAllBlocks(votingId.toString())
+        if (allBlocks.isEmpty()) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No votes found for this voting")
+        }
 
         val counts = mutableMapOf<String, Int>()
         allBlocks.forEach { block ->
@@ -69,7 +89,6 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
             voteName = voting.name,
             results  = results
         )
-
     }
 
     private fun BlockchainServiceV1.GetBlockResponse.mapToRest(): CheckVoteResponse =

@@ -17,8 +17,11 @@ class VotingService(
     private val cryptoGrpcClient: CryptoGrpcClient,
     private val blockchainGrpcClient: BlockchainGrpcClient
 ) {
-    fun getVoting(userId: UUID, votingId: UUID): GetVotingResponse =
-        votingRepository.findById(votingId).get().mapToRest(
+    fun getVoting(userId: UUID, votingId: UUID): GetVotingResponse {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        return voting.mapToRest( 
             votePermission = votePermissionRepository.findByUserIdAndVotingId(
                 userId,
                 votingId
@@ -28,6 +31,7 @@ class VotingService(
                 votingId
             ),
         )
+    }
 
     fun getVotings(
         userId: UUID,
@@ -65,6 +69,18 @@ class VotingService(
         }
 
     fun requestForVote(userId: UUID, votingId: UUID) {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        if (voting.createdBy == userId) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You are the creator of this voting")
+        }
+
+        val existingPermission = votePermissionRepository.findByUserIdAndVotingId(userId, votingId)
+        if (existingPermission != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "You have already requested permission to vote")
+        }
+
         votePermissionRepository.save(
             VotePermission(
                 userId = userId,
@@ -75,6 +91,18 @@ class VotingService(
     }
 
     fun requestForWatch(userId: UUID, votingId: UUID) {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        if (voting.createdBy == userId) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You are the creator of this voting")
+        }
+
+        val existingPermission = watchPermissionRepository.findByUserIdAndVotingId(userId, votingId)
+        if (existingPermission != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "You have already requested permission to watch")
+        }
+
         watchPermissionRepository.save(
             WatchPermission(
                 userId = userId,
@@ -90,48 +118,52 @@ class VotingService(
         votingId: UUID,
         voteSubmissionRequest: VoteSubmissionRequest
     ): VotingTokenResponse {
-        val perm = votePermissionRepository
-            .findByUserIdAndVotingId(userId, votingId)
-            ?: throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Permission not found"
-            )
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        val now = Instant.now()
+        if (now.isBefore(voting.startAt)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting has not started yet")
+        }
+        if (now.isAfter(voting.endAt)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting has already ended")
+        }
+
+        val perm = votePermissionRepository.findByUserIdAndVotingId(userId, votingId)
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to vote")
 
         if (perm.status != PermissionStatus.APPROVED) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN, "Voting not approved"
-            )
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Your voting permission is not approved")
         }
 
         if (perm.isUsed) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "This vote token has already been used"
-            )
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You have already voted")
+        }
+
+        if (perm.token != userVoteToken.toString()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid vote token")
         }
 
         val (sigOk, sigMsg) = cryptoGrpcClient.checkSign(
-            signedPublicKey   = voteSubmissionRequest.signature,
-            originalMessage   = voteSubmissionRequest.encryptedVote
+            signedPublicKey = voteSubmissionRequest.signature,
+            originalMessage = voteSubmissionRequest.encryptedVote
         )
         if (!sigOk) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Invalid signature: $sigMsg"
-            )
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid signature: $sigMsg")
         }
 
         val (zkOk, zkMsg) = cryptoGrpcClient.checkZeroKnowledgeProof(
             encryptedVote = voteSubmissionRequest.encryptedVote,
-            zkProof       = voteSubmissionRequest.zeroKnowledgeProof
+            zkProof = voteSubmissionRequest.zeroKnowledgeProof
         )
         if (!zkOk) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Invalid zero-knowledge proof: $zkMsg"
-            )
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid zero-knowledge proof: $zkMsg")
         }
 
         val voteToken = blockchainGrpcClient.saveVote(
-            voteId            = votingId.toString(),
-            userId            = userId.toString(),
-            encryptedVote     = voteSubmissionRequest.encryptedVote,
+            voteId = votingId.toString(),
+            userId = userId.toString(),
+            encryptedVote = voteSubmissionRequest.encryptedVote,
             zeroKnowledgeProof = voteSubmissionRequest.zeroKnowledgeProof
         )
 
@@ -142,7 +174,7 @@ class VotingService(
 
         return VotingTokenResponse(
             status = VoteStatus.APPROVED,
-            token  = voteToken
+            token = voteToken
         )
     }
 }

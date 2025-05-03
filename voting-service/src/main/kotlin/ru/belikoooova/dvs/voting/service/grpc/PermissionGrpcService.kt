@@ -1,6 +1,7 @@
 package ru.belikoooova.dvs.voting.service.grpc
 
 import io.grpc.stub.StreamObserver
+import ru.belikoooova.dvs.voting.service.data.PermissionStatus
 import ru.belikoooova.dvs.voting.service.data.VotePermissionRepository
 import ru.belikoooova.dvs.voting.service.data.WatchPermissionRepository
 import ru.belikoooova.dvs.voting.service.grpc.v1.VotingServiceGrpc
@@ -21,7 +22,7 @@ class PermissionGrpcService(
             UUID.fromString(request.voteId)
         )
 
-        val response = if (permission == null) {
+        val response = if (permission == null || permission.status == PermissionStatus.REQUESTED || permission.status == PermissionStatus.REJECTED) {
             VotingServiceV1.VotePermissionResponse.newBuilder()
                 .setIsAccepted(false)
                 .setUniqueVoteToken("")
@@ -46,7 +47,7 @@ class PermissionGrpcService(
             UUID.fromString(request.voteId)
         )
 
-        val response = if (permission == null) {
+        val response = if (permission == null || permission.status == PermissionStatus.REQUESTED || permission.status == PermissionStatus.REJECTED) {
             VotingServiceV1.WatchPermissionResponse.newBuilder()
                 .setIsAccepted(false)
                 .build()

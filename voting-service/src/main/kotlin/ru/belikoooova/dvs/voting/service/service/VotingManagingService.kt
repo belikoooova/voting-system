@@ -1,6 +1,8 @@
 package ru.belikoooova.dvs.voting.service.service;
 
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import ru.belikoooova.dvs.voting.service.api.v1.model.AnswerForWatchOrVoteRequestResponse
 import ru.belikoooova.dvs.voting.service.api.v1.model.CreateOrEditVotingRequest
 import ru.belikoooova.dvs.voting.service.api.v1.model.GetVotingResponse
@@ -21,8 +23,9 @@ class VotingManagingService(
     fun getVoteRequests(userId: UUID): List<WatchOrVoteRequestResponse> =
         votePermissionRepository.findAllNonAnsweredByVotingCreator(userId)
             .map {
-                val voting: Voting = votingRepository.findById(it.votingId).get()
-                val userInfoDto: UserInfoDto = authGrpcClient.getUserInfo(it.userId.toString())
+                val voting = votingRepository.findById(it.votingId)
+                    .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+                val userInfoDto = authGrpcClient.getUserInfo(it.userId.toString())
                 WatchOrVoteRequestResponse(
                     permissionId = it.id.toString(),
                     voteId = voting.id.toString(),
@@ -37,8 +40,9 @@ class VotingManagingService(
     fun getWatchRequests(userId: UUID): List<WatchOrVoteRequestResponse> =
         watchPermissionRepository.findAllNonAnsweredByVotingCreator(userId)
             .map {
-                val voting: Voting = votingRepository.findById(it.votingId).get()
-                val userInfoDto: UserInfoDto = authGrpcClient.getUserInfo(it.userId.toString())
+                val voting = votingRepository.findById(it.votingId)
+                    .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+                val userInfoDto = authGrpcClient.getUserInfo(it.userId.toString())
                 WatchOrVoteRequestResponse(
                     permissionId = it.id.toString(),
                     voteId = voting.id.toString(),
@@ -57,17 +61,23 @@ class VotingManagingService(
     ) {
         // todo create uuid type for openapi?
         request.forEach {
+            val permission = votePermissionRepository.findById(UUID.fromString(it.permissionId))
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Vote permission not found") }
+            
+            if (permission.votingId != userId) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the creator of this voting")
+            }
+
             votePermissionRepository.save(
-                votePermissionRepository.findById(UUID.fromString(it.permissionId)).get()
-                    .apply {
-                        if (it.approve) {
-                            this.status = PermissionStatus.APPROVED
-                            this.token = UUID.randomUUID().toString()
-                        } else {
-                            this.status = PermissionStatus.REJECTED
-                        }
-                        this.lastUpdatedAt = Instant.now()
+                permission.apply {
+                    if (it.approve) {
+                        this.status = PermissionStatus.APPROVED
+                        this.token = UUID.randomUUID().toString()
+                    } else {
+                        this.status = PermissionStatus.REJECTED
                     }
+                    this.lastUpdatedAt = Instant.now()
+                }
             )
         }
     }
@@ -77,16 +87,22 @@ class VotingManagingService(
         request: List<AnswerForWatchOrVoteRequestResponse>
     ) {
         request.forEach {
+            val permission = watchPermissionRepository.findById(UUID.fromString(it.permissionId))
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Watch permission not found") }
+            
+            if (permission.votingId != userId) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the creator of this voting")
+            }
+
             watchPermissionRepository.save(
-                watchPermissionRepository.findById(UUID.fromString(it.permissionId)).get()
-                    .apply {
-                        if (it.approve) {
-                            this.status = PermissionStatus.APPROVED
-                        } else {
-                            this.status = PermissionStatus.REJECTED
-                        }
-                        this.lastUpdatedAt = Instant.now()
+                permission.apply {
+                    if (it.approve) {
+                        this.status = PermissionStatus.APPROVED
+                    } else {
+                        this.status = PermissionStatus.REJECTED
                     }
+                    this.lastUpdatedAt = Instant.now()
+                }
             )
         }
     }
@@ -118,26 +134,15 @@ class VotingManagingService(
         userId: UUID,
         votingId: UUID,
         request: CreateOrEditVotingRequest
-    ): GetVotingResponse = votingRepository.save(request.mapToDataModel(userId)).mapToRest(
-        votePermission = votePermissionRepository.findByUserIdAndVotingId(
-            userId,
-            votingId
-        ),
-        watchPermission = watchPermissionRepository.findByUserIdAndVotingId(
-            userId,
-            votingId
-        ),
-    )
+    ): GetVotingResponse {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+        
+        if (voting.createdBy != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the creator of this voting")
+        }
 
-    fun deleteCreatedVoting(userId: UUID, votingId: UUID) {
-        votingRepository.deleteById(votingId) // todo can user do this?
-    }
-
-    fun getCreatedVoting(
-        userId: UUID,
-        votingId: UUID
-    ): GetVotingResponse =
-        votingRepository.findById(votingId).get().mapToRest(
+        return votingRepository.save(request.mapToDataModel(userId)).mapToRest(
             votePermission = votePermissionRepository.findByUserIdAndVotingId(
                 userId,
                 votingId
@@ -147,6 +152,41 @@ class VotingManagingService(
                 votingId
             ),
         )
+    }
+
+    fun deleteCreatedVoting(userId: UUID, votingId: UUID) {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+        
+        if (voting.createdBy != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the creator of this voting")
+        }
+
+        votingRepository.deleteById(votingId)
+    }
+
+    fun getCreatedVoting(
+        userId: UUID,
+        votingId: UUID
+    ): GetVotingResponse {
+        val voting = votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+        
+        if (voting.createdBy != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the creator of this voting")
+        }
+
+        return voting.mapToRest(
+            votePermission = votePermissionRepository.findByUserIdAndVotingId(
+                userId,
+                votingId
+            ),
+            watchPermission = watchPermissionRepository.findByUserIdAndVotingId(
+                userId,
+                votingId
+            ),
+        )
+    }
 
     fun getCreatedVotings(userId: UUID): List<GetVotingResponse> =
         votingRepository.findAllByCreatedBy(userId).map {

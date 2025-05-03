@@ -15,15 +15,12 @@ import java.util.*
 class AuthController(
     private val authService: AuthService
 ): AuthenticationApi {
-    override fun register(registerRequest: RegisterRequest?): ResponseEntity<AuthResponse> =
+    override fun register(registerRequest: RegisterRequest): ResponseEntity<AuthResponse> =
         authService.register(registerRequest)
 
-    override fun login(loginRequest: LoginRequest?): ResponseEntity<AuthResponse> =
+    override fun login(loginRequest: LoginRequest): ResponseEntity<AuthResponse> =
         authService.login(loginRequest)
 
-    override fun me(@RequestHeader(required = false, value = "X-User-Id") xUserId: String?
-    ): ResponseEntity<MeResponse> {
-        xUserId ?: return ResponseEntity.badRequest().build()
-        return authService.me(UUID.fromString(xUserId))
-    }
+    override fun me(xUserId: String): ResponseEntity<MeResponse> =
+        authService.me(UUID.fromString(xUserId))
 }
