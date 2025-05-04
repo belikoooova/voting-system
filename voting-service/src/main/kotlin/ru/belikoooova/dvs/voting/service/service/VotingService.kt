@@ -2,6 +2,8 @@ package ru.belikoooova.dvs.voting.service.service
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import ru.belikoooova.dvs.voting.service.api.v1.model.*
 import ru.belikoooova.dvs.voting.service.data.*
@@ -10,6 +12,7 @@ import ru.belikoooova.dvs.voting.service.grpc.CryptoGrpcClient
 import java.time.Instant
 import java.util.*
 
+@Service
 class VotingService(
     private val votePermissionRepository: VotePermissionRepository,
     private val watchPermissionRepository: WatchPermissionRepository,
@@ -17,6 +20,7 @@ class VotingService(
     private val cryptoGrpcClient: CryptoGrpcClient,
     private val blockchainGrpcClient: BlockchainGrpcClient
 ) {
+    @Transactional
     fun getVoting(userId: UUID, votingId: UUID): GetVotingResponse {
         val voting = votingRepository.findById(votingId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
@@ -33,6 +37,7 @@ class VotingService(
         )
     }
 
+    @Transactional
     fun getVotings(
         userId: UUID,
         filter: VotingFilter
@@ -55,19 +60,28 @@ class VotingService(
                 true
             }
         }.filter {
-            if (filter.approvedForVoting != null && filter.approvedForVoting!!) {
-                it.votePermission == Permission.APPROVED || it.votePermission == Permission.CREATOR
+            if (filter.approvedForVoting != null) {
+                if (filter.approvedForVoting!!) {
+                    it.votePermission == Permission.APPROVED || it.votePermission == Permission.CREATOR
+                } else {
+                    it.votePermission == Permission.REJECTED || it.votePermission == Permission.REQUESTED
+                }
             } else {
                 true
             }
         }.filter {
-            if (filter.approvedForWatching != null && filter.approvedForWatching!!) {
-                it.watchPermissionQuote == Permission.APPROVED || it.watchPermissionQuote == Permission.CREATOR
+            if (filter.approvedForWatching != null) {
+                if (filter.approvedForWatching!!) {
+                    it.watchPermissionQuote == Permission.APPROVED || it.watchPermissionQuote == Permission.CREATOR
+                } else {
+                    it.watchPermissionQuote == Permission.REJECTED || it.watchPermissionQuote == Permission.REQUESTED
+                }
             } else {
                 true
             }
         }
 
+    @Transactional
     fun requestForVote(userId: UUID, votingId: UUID) {
         val voting = votingRepository.findById(votingId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }

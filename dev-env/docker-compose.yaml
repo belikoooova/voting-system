@@ -120,6 +120,17 @@ services:
       - blockchain-service
       - crypto-service
 
+  ui:
+    build:
+      context: ../ui/voting-system
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - envoy
+    networks:
+      - voting-net
+
 networks:
   voting-net:
     driver: bridge

@@ -1,8 +1,6 @@
 package ru.belikoooova.dvs.voting.service.data
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -16,9 +14,13 @@ import java.util.*
 class VotePermission(
     @Id
     @JvmField
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     val id: UUID? = null,
     val userId: UUID,
     val votingId: UUID,
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "text", nullable = false)
     var status: PermissionStatus,
     var token: String? = null,
     val createdAt: Instant = Instant.now(),
@@ -36,9 +38,13 @@ class VotePermission(
 class WatchPermission(
     @Id
     @JvmField
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     val id: UUID? = null,
     val userId: UUID,
     val votingId: UUID,
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "text", nullable = false)
     var status: PermissionStatus,
     val createdAt: Instant = Instant.now(),
     var lastUpdatedAt: Instant = Instant.now()
@@ -57,24 +63,32 @@ enum class PermissionStatus {
 interface VotePermissionRepository : JpaRepository<VotePermission, UUID> {
     fun findByUserIdAndVotingId(userId: UUID, votingId: UUID): VotePermission?
 
-    @Query(
-        value = "select * from vote_permission vp " +
-                "join voting v on vp.voting_id = v.id " +
-                "where v.created_by = :creator and vp.status = 'REQUESTED'",
-        nativeQuery = true
-    )
-    fun findAllNonAnsweredByVotingCreator(@Param("creator") creator: UUID): List<VotePermission>
+    @Query("""
+        SELECT vp
+        FROM VotePermission vp
+        JOIN Voting v
+            ON vp.votingId = v.id
+        WHERE v.createdBy = :creator
+        AND vp.status = ru.belikoooova.dvs.voting.service.data.PermissionStatus.REQUESTED
+        """) 
+    fun findAllNonAnsweredVoteRequestsByVotingCreator(
+        @Param("creator") creator: UUID
+    ): List<VotePermission>
 }
 
 @Repository
 interface WatchPermissionRepository : JpaRepository<WatchPermission, UUID> {
     fun findByUserIdAndVotingId(userId: UUID, votingId: UUID): WatchPermission?
 
-    @Query(
-        value = "select * from watch_permission wp " +
-                "join voting v on wp.voting_id = v.id " +
-                "where v.created_by = :creator and wp.status = 'REQUESTED'",
-        nativeQuery = true
-    )
-    fun findAllNonAnsweredByVotingCreator(@Param("creator") creator: UUID): List<WatchPermission>
+    @Query("""
+        SELECT wp
+            FROM WatchPermission wp
+            JOIN Voting v
+            ON wp.votingId = v.id
+            WHERE v.createdBy = :creator
+            AND wp.status = ru.belikoooova.dvs.voting.service.data.PermissionStatus.REQUESTED
+        """)
+    fun findAllNonAnsweredWatchRequestsByCreator(
+        @Param("creator") creator: UUID
+    ): List<WatchPermission>
 }

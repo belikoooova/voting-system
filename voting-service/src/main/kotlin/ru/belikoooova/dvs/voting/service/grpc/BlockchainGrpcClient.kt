@@ -1,9 +1,11 @@
 package ru.belikoooova.dvs.voting.service.grpc
 
 import net.devh.boot.grpc.client.inject.GrpcClient
+import org.springframework.stereotype.Service
 import ru.belikoooova.dvs.blockchain.service.grpc.v1.BlockchainServiceGrpc
 import ru.belikoooova.dvs.blockchain.service.grpc.v1.BlockchainServiceV1
 
+@Service
 class BlockchainGrpcClient {
 
     @GrpcClient("blockchain-client")

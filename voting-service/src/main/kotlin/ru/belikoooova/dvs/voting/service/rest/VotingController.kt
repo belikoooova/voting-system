@@ -2,6 +2,7 @@ package ru.belikoooova.dvs.voting.service.rest
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.RestController
 import ru.belikoooova.dvs.voting.service.api.v1.VotingApi
 import ru.belikoooova.dvs.voting.service.api.v1.model.GetVotingResponse
 import ru.belikoooova.dvs.voting.service.api.v1.model.VoteSubmissionRequest
@@ -10,6 +11,7 @@ import ru.belikoooova.dvs.voting.service.api.v1.model.VotingTokenResponse
 import ru.belikoooova.dvs.voting.service.service.VotingService
 import java.util.*
 
+@RestController
 class VotingController(private val votingService: VotingService) : VotingApi {
     override fun getVoting(xUserId: String, votingId: String): ResponseEntity<GetVotingResponse> =
         ResponseEntity.ok(

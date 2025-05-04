@@ -1,11 +1,9 @@
 package ru.belikoooova.dvs.voting.service.data
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 import java.time.Instant
 import java.util.*
 
@@ -14,6 +12,8 @@ import java.util.*
 class Answer(
     @Id
     @JvmField
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     val id: UUID? = null,
     @Column(name = "voting_id")
     val votingId: UUID,
@@ -27,4 +27,7 @@ class Answer(
     override fun isNew(): Boolean = id == null
 }
 
-interface AnswerRepository : JpaRepository<Answer, UUID>
+@Repository
+interface AnswerRepository : JpaRepository<Answer, UUID> {
+    fun deleteAllByVotingId(votingId: UUID)
+}

@@ -1,6 +1,7 @@
 package ru.belikoooova.dvs.voting.service.grpc
 
 import io.grpc.stub.StreamObserver
+import org.springframework.stereotype.Service
 import ru.belikoooova.dvs.voting.service.data.PermissionStatus
 import ru.belikoooova.dvs.voting.service.data.VotePermissionRepository
 import ru.belikoooova.dvs.voting.service.data.WatchPermissionRepository
@@ -8,6 +9,7 @@ import ru.belikoooova.dvs.voting.service.grpc.v1.VotingServiceGrpc
 import ru.belikoooova.dvs.voting.service.grpc.v1.VotingServiceV1
 import java.util.*
 
+@Service
 class PermissionGrpcService(
     private val votePermissionRepository: VotePermissionRepository,
     private val watchPermissionRepository: WatchPermissionRepository

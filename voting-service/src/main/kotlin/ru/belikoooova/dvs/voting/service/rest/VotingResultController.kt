@@ -1,6 +1,7 @@
 package ru.belikoooova.dvs.voting.service.rest
 
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.RestController
 import ru.belikoooova.dvs.voting.service.api.v1.VotingResultApi
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteRequest
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteResponse
@@ -8,6 +9,7 @@ import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVotingResultsResponse
 import ru.belikoooova.dvs.voting.service.service.VotingResultService
 import java.util.*
 
+@RestController
 class VotingResultController(private val votingResultService: VotingResultService) :
     VotingResultApi {
     override fun checkVote(

@@ -1,6 +1,8 @@
 package ru.belikoooova.dvs.voting.service.service
 
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import ru.belikoooova.dvs.blockchain.service.grpc.v1.BlockchainServiceV1
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteRequest
@@ -13,9 +15,11 @@ import ru.belikoooova.dvs.voting.service.grpc.CryptoGrpcClient
 import java.time.Instant
 import java.util.*
 
+@Service
 class VotingResultService(private val blockchainGrpcClient: BlockchainGrpcClient,
     private val votingRepository: VotingRepository,
 private val cryptoGrpcClient: CryptoGrpcClient) {
+    @Transactional
     fun checkVote(
         userId: UUID,
         votingId: UUID,
@@ -30,6 +34,7 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
         return block.mapToRest()
     }
 
+    @Transactional
     fun checkAllVotes(
         userId: UUID,
         votingId: UUID
@@ -45,6 +50,7 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
         return blocks.map { it.mapToRest() }
     }
 
+    @Transactional
     fun checkVotingResults(
         userId: UUID,
         votingId: UUID

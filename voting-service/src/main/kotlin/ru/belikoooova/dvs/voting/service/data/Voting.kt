@@ -3,6 +3,7 @@ package ru.belikoooova.dvs.voting.service.data
 import jakarta.persistence.*
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 import ru.belikoooova.dvs.voting.service.api.v1.model.GetVotingResponse
 import ru.belikoooova.dvs.voting.service.api.v1.model.Permission
 import ru.belikoooova.dvs.voting.service.api.v1.model.VotingStatus
@@ -14,20 +15,22 @@ import java.util.*
 class Voting(
     @Id
     @JvmField
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     val id: UUID? = null,
-    val name: String,
-    val description: String,
-    val question: String,
-    val startAt: Instant,
-    val endAt: Instant,
+    var name: String,
+    var description: String,
+    var question: String,
+    var startAt: Instant,
+    var endAt: Instant,
     val createdBy: UUID,
     val createdAt: Instant = Instant.now(),
     var lastUpdatedAt: Instant = Instant.now()
 ) : Persistable<UUID> {
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "voting_id")
-    var answers: List<Answer> = emptyList()
+    var answers: MutableList<Answer> = mutableListOf()
 
     override fun getId(): UUID? = id
 
@@ -81,6 +84,7 @@ class Voting(
     }
 }
 
+@Repository
 interface VotingRepository : JpaRepository<Voting, UUID> {
     fun findAllByCreatedBy(userId: UUID): List<Voting>
 }

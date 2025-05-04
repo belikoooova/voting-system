@@ -5,7 +5,7 @@ create table answer
 (
     id              uuid      not null default gen_random_uuid()
         constraint pk_answer primary key,
-    voting_id       uuid      not null references voting (id),
+    voting_id       uuid      references voting (id) on delete cascade,
     option_text     text      not null,
     created_at      timestamp not null,
     last_updated_at timestamp not null

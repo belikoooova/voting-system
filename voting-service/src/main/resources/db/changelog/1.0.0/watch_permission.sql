@@ -6,9 +6,9 @@ create table watch_permission
     id              uuid      not null default gen_random_uuid()
         constraint pk_watch_permission primary key,
     user_id         uuid      not null,
-    voting_id       uuid      not null references voting (id),
+    voting_id       uuid      references voting (id) on delete cascade,
     status          text      not null
-        constraint ch_watch_permission_status check (status in ('REQUESTED', 'ACCEPTED', 'REJECTED')),
+        constraint ch_watch_permission_status check (status in ('REQUESTED', 'APPROVED', 'REJECTED', 'CREATOR')),
     created_at      timestamp not null,
     last_updated_at timestamp not null
 );
