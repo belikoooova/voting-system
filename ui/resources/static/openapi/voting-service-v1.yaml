@@ -313,6 +313,33 @@ paths:
         400:
           description: Некорректные параметры запроса
   /voting/api/v1/votings/{votingId}/request/vote:
+    get:
+      tags:
+        - Voting
+      summary: Просмотр статуса запроса на право голосовать
+      description: Просмотр статуса запроса на право голосовать
+      operationId: GetRequestForVoteStatus
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionRequestStatusResponse'
+        400:
+          description: Некорректные параметры запроса
     post:
       tags:
         - Voting
@@ -337,6 +364,33 @@ paths:
         400:
           description: Некорректные параметры запроса
   /voting/api/v1/votings/{votingId}/request/watch:
+    get:
+      tags:
+        - Voting
+      summary: Просмотр статуса запроса на право наблюдать
+      description: Просмотр статуса запроса на право наблюдать
+      operationId: GetRequestForWatchStatus
+      parameters:
+        - in: header
+          name: X-User-Id
+          schema:
+            type: string
+          description: ID пользователя
+          required: true
+        - in: path
+          name: votingId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionRequestStatusResponse'
+        400:
+          description: Некорректные параметры запроса
     post:
       tags:
         - Voting
@@ -499,6 +553,19 @@ components:
       type: http
       scheme: bearer
   schemas:
+    PermissionRequestStatusResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/PermissionRequestStatus'
+    PermissionRequestStatus:
+      type: string
+      enum:
+        - NOT_REQUESTED
+        - CREATOR
+        - REQUESTED
+        - APPROVED
+        - REJECTED
     CreateOrEditVotingRequest:
       type: object
       properties:
