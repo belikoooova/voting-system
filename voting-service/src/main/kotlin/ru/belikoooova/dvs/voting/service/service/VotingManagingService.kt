@@ -83,13 +83,6 @@ class VotingManagingService(
                     )
                 }
 
-            if (permission.votingId != userId) {
-                throw ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "You are not the creator of this voting"
-                )
-            }
-
             votePermissionRepository.save(
                 permission.apply {
                     if (it.approve) {
@@ -117,13 +110,6 @@ class VotingManagingService(
                         "Watch permission not found"
                     )
                 }
-
-            if (permission.votingId != userId) {
-                throw ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "You are not the creator of this voting"
-                )
-            }
 
             watchPermissionRepository.save(
                 permission.apply {

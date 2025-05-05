@@ -4,15 +4,32 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import ru.belikoooova.dvs.voting.service.api.v1.VotingApi
-import ru.belikoooova.dvs.voting.service.api.v1.model.GetVotingResponse
-import ru.belikoooova.dvs.voting.service.api.v1.model.VoteSubmissionRequest
-import ru.belikoooova.dvs.voting.service.api.v1.model.VotingFilter
-import ru.belikoooova.dvs.voting.service.api.v1.model.VotingTokenResponse
+import ru.belikoooova.dvs.voting.service.api.v1.model.*
 import ru.belikoooova.dvs.voting.service.service.VotingService
 import java.util.*
 
 @RestController
 class VotingController(private val votingService: VotingService) : VotingApi {
+    override fun getRequestForVoteStatus(
+        xUserId: String,
+        votingId: String
+    ): ResponseEntity<PermissionRequestStatusResponse> =
+        ResponseEntity.ok(
+            votingService.getRequestForVoteStatus(
+                UUID.fromString(xUserId), UUID.fromString(votingId)
+            )
+        )
+
+    override fun getRequestForWatchStatus(
+        xUserId: String,
+        votingId: String
+    ): ResponseEntity<PermissionRequestStatusResponse> =
+        ResponseEntity.ok(
+            votingService.getRequestForWatchStatus(
+                UUID.fromString(xUserId), UUID.fromString(votingId)
+            )
+        )
+
     override fun getVoting(xUserId: String, votingId: String): ResponseEntity<GetVotingResponse> =
         ResponseEntity.ok(
             votingService.getVoting(

@@ -82,6 +82,50 @@ class VotingService(
         }
 
     @Transactional
+    fun getRequestForVoteStatus(userId: UUID, votingId: UUID): PermissionRequestStatusResponse {
+        votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        val existingPermission = votePermissionRepository.findByUserIdAndVotingId(userId, votingId)
+        return if (existingPermission == null) {
+            PermissionRequestStatusResponse(
+                status = PermissionRequestStatus.NOT_REQUESTED
+            )
+        } else {
+            PermissionRequestStatusResponse(
+                status = when (existingPermission.status) {
+                    PermissionStatus.CREATOR -> PermissionRequestStatus.CREATOR
+                    PermissionStatus.REQUESTED -> PermissionRequestStatus.REQUESTED
+                    PermissionStatus.APPROVED -> PermissionRequestStatus.APPROVED
+                    PermissionStatus.REJECTED -> PermissionRequestStatus.REJECTED
+                }
+            )
+        }
+    }
+
+    @Transactional
+    fun getRequestForWatchStatus(userId: UUID, votingId: UUID): PermissionRequestStatusResponse {
+        votingRepository.findById(votingId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
+
+        val existingPermission = watchPermissionRepository.findByUserIdAndVotingId(userId, votingId)
+        return if (existingPermission == null) {
+            PermissionRequestStatusResponse(
+                status = PermissionRequestStatus.NOT_REQUESTED
+            )
+        } else {
+            PermissionRequestStatusResponse(
+                status = when (existingPermission.status) {
+                    PermissionStatus.CREATOR -> PermissionRequestStatus.CREATOR
+                    PermissionStatus.REQUESTED -> PermissionRequestStatus.REQUESTED
+                    PermissionStatus.APPROVED -> PermissionRequestStatus.APPROVED
+                    PermissionStatus.REJECTED -> PermissionRequestStatus.REJECTED
+                }
+            )
+        }
+    }
+
+    @Transactional
     fun requestForVote(userId: UUID, votingId: UUID) {
         val voting = votingRepository.findById(votingId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
@@ -104,6 +148,7 @@ class VotingService(
         )
     }
 
+    @Transactional
     fun requestForWatch(userId: UUID, votingId: UUID) {
         val voting = votingRepository.findById(votingId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Voting not found") }
