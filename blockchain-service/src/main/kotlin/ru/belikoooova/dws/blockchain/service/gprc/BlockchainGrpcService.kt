@@ -30,7 +30,7 @@ class BlockchainGrpcService(private val voteContract: VoteContract) :
         if (events.isEmpty()) {
             throw IllegalStateException("VoteSaved not found")
         }
-        val token = String(events[0].voteToken)
+        val token = events[0].voteToken
         hashesByVoteToken[token] = receipt.blockHash
 
         responseObserver.onNext(

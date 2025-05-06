@@ -91,7 +91,7 @@ class VotingService(
             PermissionRequestStatusResponse(
                 status = PermissionRequestStatus.NOT_REQUESTED
             )
-        } else {
+        } else if (!existingPermission.isUsed) {
             PermissionRequestStatusResponse(
                 status = when (existingPermission.status) {
                     PermissionStatus.CREATOR -> PermissionRequestStatus.CREATOR
@@ -100,6 +100,8 @@ class VotingService(
                     PermissionStatus.REJECTED -> PermissionRequestStatus.REJECTED
                 }
             )
+        } else {
+            PermissionRequestStatusResponse(status = PermissionRequestStatus.USED)
         }
     }
 
@@ -191,10 +193,6 @@ class VotingService(
         val perm = votePermissionRepository.findByUserIdAndVotingId(userId, votingId)
             ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to vote")
 
-        if (perm.status != PermissionStatus.APPROVED) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Your voting permission is not approved")
-        }
-
         if (perm.isUsed) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You have already voted")
         }
@@ -222,12 +220,11 @@ class VotingService(
         val voteToken = blockchainGrpcClient.saveVote(
             voteId = votingId.toString(),
             userId = userId.toString(),
-            encryptedVote = voteSubmissionRequest.encryptedVote,
+            encryptedVote = cryptoGrpcClient.encrypt(voteSubmissionRequest.answerId),
             zeroKnowledgeProof = voteSubmissionRequest.zeroKnowledgeProof
         )
 
         perm.isUsed = true
-        perm.token = voteToken
         perm.lastUpdatedAt = Instant.now()
         votePermissionRepository.save(perm)
 

@@ -13,7 +13,7 @@ contract VoteContract {
     mapping(string => Vote) private votesByToken;
     mapping(string => string[]) private tokensByVoteId;
 
-    event VoteSaved(string indexed voteToken, string voteId, string userId);
+    event VoteSaved(string voteToken, string voteId, string userId);
 
     /// @notice Сохраняет голос и возвращает уникальный voteToken
     function saveVote(

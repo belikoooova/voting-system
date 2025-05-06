@@ -18,6 +18,10 @@
   "homepage": "https://github.com/belikoooova/voting-system#readme",
   "description": "",
   "devDependencies": {
+    "process": "^0.11.10",
     "truffle": "^5.11.5"
+  },
+  "dependencies": {
+    "@cloudflare/blindrsa-ts": "^0.4.3"
   }
 }

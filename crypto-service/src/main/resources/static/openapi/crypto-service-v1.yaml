@@ -63,7 +63,7 @@ paths:
                 $ref: '#/components/schemas/PublicKeyResponse'
         400:
           description: Некорректные параметры запроса
-  /crypto/api/v1/votes/{voteId}/zeroKnowledgeProof:
+  /crypto/api/v1/votings/{votingId}/zeroKnowledgeProof:
     get:
       tags:
         - Cryptography
@@ -72,7 +72,7 @@ paths:
       operationId: GetZeroKnowledgeProof
       parameters:
         - in: path
-          name: voteId
+          name: votingId
           schema:
             type: string
           required: true

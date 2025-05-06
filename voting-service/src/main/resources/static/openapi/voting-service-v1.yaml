@@ -566,6 +566,7 @@ components:
         - REQUESTED
         - APPROVED
         - REJECTED
+        - USED
     CreateOrEditVotingRequest:
       type: object
       properties:

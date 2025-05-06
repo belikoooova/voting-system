@@ -6,6 +6,7 @@ service CryptoService {
   rpc checkSign(CheckSignRequest) returns (CheckResponse);
   rpc checkZeroKnowledgeProof(CheckZeroKnowledgeProofRequest) returns (CheckResponse);
   rpc decrypt(DecryptRequest) returns (DecryptResponse);
+  rpc encrypt(EncryptRequest) returns (EncryptResponse);
 }
 
 message CheckSignRequest {
@@ -29,4 +30,12 @@ message DecryptRequest {
 
 message DecryptResponse{
   string answerId = 1;
+}
+
+message EncryptRequest {
+  string answerId = 1;
+}
+
+message EncryptResponse{
+  string encryptedVote = 1;
 }

@@ -36,4 +36,10 @@ class CryptoGrpcClient {
         stub.decrypt(
             CryptoServiceV1.DecryptRequest.newBuilder().setEncryptedVote(encryptedVote).build()
         ).answerId
+
+    @Caching
+    fun encrypt(vote: String): String =
+        stub.encrypt(
+            CryptoServiceV1.EncryptRequest.newBuilder().setAnswerId(vote).build()
+        ).encryptedVote
 }

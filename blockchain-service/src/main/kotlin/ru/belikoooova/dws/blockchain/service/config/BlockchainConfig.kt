@@ -15,6 +15,13 @@ import java.math.BigInteger
 class BlockchainConfig(private val props: BlockchainProperties) {
 
     @Bean
+    fun staticGasProvider(): StaticGasProvider =
+        StaticGasProvider(
+            DefaultGasProvider.GAS_PRICE,
+            BigInteger.valueOf(7_500_000)
+        )
+
+    @Bean
     fun web3j(): Web3j {
         System.setProperty("org.web3j.ens.enabled", "false")
         return Web3j.build(HttpService(props.rpcUrl))
@@ -25,12 +32,12 @@ class BlockchainConfig(private val props: BlockchainProperties) {
         Credentials.create(props.privateKey)
 
     @Bean
-    fun voteContract(web3j: Web3j, credentials: Credentials): VoteContract {
+    fun voteContract(web3j: Web3j, credentials: Credentials, gasProvider: StaticGasProvider): VoteContract {
         return VoteContract.load(
             props.contractAddress,
             web3j,
             credentials,
-            DefaultGasProvider()
+            gasProvider
         )
     }
 }

@@ -51,4 +51,20 @@ class CryptoGrpcService(private val cryptoService: CryptoService) : CryptoServic
         )
         responseObserver.onCompleted()
     }
+
+    override fun encrypt(
+        request: CryptoServiceV1.EncryptRequest,
+        responseObserver: StreamObserver<CryptoServiceV1.EncryptResponse>
+    ) {
+        responseObserver.onNext(
+            CryptoServiceV1.EncryptResponse.newBuilder()
+                .setEncryptedVote(
+                    cryptoService.encrypt(
+                        request.answerId
+                    )
+                )
+                .build()
+        )
+        responseObserver.onCompleted()
+    }
 }

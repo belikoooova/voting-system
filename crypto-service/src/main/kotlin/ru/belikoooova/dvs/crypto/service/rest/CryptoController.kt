@@ -18,8 +18,8 @@ class CryptoController(private val cryptoService: CryptoService): CryptographyAp
         ResponseEntity.ok(cryptoService.sign(signRequest))
 
     override fun getZeroKnowledgeProof(
-        voteId: String,
+        votingId: String,
         xUserId: String
     ): ResponseEntity<ZeroKnowledgeProofResponse> =
-        ResponseEntity.ok(cryptoService.generateZkProof(voteId))
+        ResponseEntity.ok(cryptoService.generateZkProof(votingId))
 }

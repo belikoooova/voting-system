@@ -71,6 +71,9 @@ dependencies {
     // openapi
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("io.swagger.core.v3:swagger-core")
+
+    // crypto
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 }
 
 kotlin {

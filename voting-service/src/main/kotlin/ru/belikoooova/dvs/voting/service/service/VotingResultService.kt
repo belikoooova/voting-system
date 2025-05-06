@@ -10,6 +10,7 @@ import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVoteResponse
 import ru.belikoooova.dvs.voting.service.api.v1.model.CheckVotingResultsResponse
 import ru.belikoooova.dvs.voting.service.api.v1.model.VotingStatus
 import ru.belikoooova.dvs.voting.service.data.VotingRepository
+import ru.belikoooova.dvs.voting.service.data.AnswerRepository
 import ru.belikoooova.dvs.voting.service.grpc.BlockchainGrpcClient
 import ru.belikoooova.dvs.voting.service.grpc.CryptoGrpcClient
 import java.time.Instant
@@ -18,7 +19,8 @@ import java.util.*
 @Service
 class VotingResultService(private val blockchainGrpcClient: BlockchainGrpcClient,
     private val votingRepository: VotingRepository,
-private val cryptoGrpcClient: CryptoGrpcClient) {
+private val cryptoGrpcClient: CryptoGrpcClient,
+private val answerRepository: AnswerRepository) {
     @Transactional
     fun checkVote(
         userId: UUID,
@@ -84,10 +86,10 @@ private val cryptoGrpcClient: CryptoGrpcClient) {
             val answerId = cryptoGrpcClient.decrypt(block.encryptedVote)
             counts[answerId] = counts.getOrDefault(answerId, 0) + 1
         }
-        val total = allBlocks.size.toDouble()
-        val results = counts.mapValues { (_, cnt) ->
-            String.format("%.2f%%", cnt / total * 100)
-        }.toMutableMap()
+        val results = mutableMapOf<String, String>()
+        counts.forEach { (key, value) ->
+            results[answerRepository.findById(UUID.fromString(key)).get().optionText] = value.toString()
+        }
 
         return CheckVotingResultsResponse(
             status   = status,
