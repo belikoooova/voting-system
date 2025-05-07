@@ -8,12 +8,14 @@ import { useAuth, AuthProvider } from './contexts/AuthContext';
 // Компоненты
 import Header from './components/Header';
 import Home from './pages/Home';
+import Onboarding from './pages/Onboarding';
 import VotingList from './pages/VotingList';
 import VotingCreate from './pages/VotingCreate';
 import VotingDetails from './pages/VotingDetails';
 import AvailableVotingDetails from './pages/AvailableVotingDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -45,25 +47,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   return <>{children}</>;
 };
 
+const AppContent = () => {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Router>
+      <Header />
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Routes>
+          <Route path="/" element={isAuthenticated ? <Home /> : <Onboarding />} />
+          <Route path="/votings" element={<VotingList />} />
+          <Route path="/votings/:id" element={<VotingDetails />} />
+          <Route path="/available-votings/:id" element={<AvailableVotingDetails />} />
+          <Route path="/votings/create" element={<VotingCreate />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </Container>
+    </Router>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router>
-          <Header />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/votings" element={<VotingList />} />
-              <Route path="/votings/:id" element={<VotingDetails />} />
-              <Route path="/available-votings/:id" element={<AvailableVotingDetails />} />
-              <Route path="/votings/create" element={<VotingCreate />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Routes>
-          </Container>
-        </Router>
+        <AppContent />
       </AuthProvider>
     </ThemeProvider>
   );
