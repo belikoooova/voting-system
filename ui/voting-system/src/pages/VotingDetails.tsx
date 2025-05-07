@@ -26,6 +26,13 @@ import {
   Tooltip,
   TextField,
   LinearProgress,
+  Container,
+  useTheme,
+  alpha,
+  Card,
+  CardContent,
+  Stack,
+  Avatar,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -49,6 +56,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import DescriptionIcon from '@mui/icons-material/Description';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 interface VotingResults {
   options: {
@@ -79,6 +91,7 @@ const VotingDetails = () => {
   const [voteRequestsDialogOpen, setVoteRequestsDialogOpen] = useState(false);
   const [watchRequestsDialogOpen, setWatchRequestsDialogOpen] = useState(false);
   const [votedSuccessfully, setVotedSuccessfully] = useState(false);
+  const theme = useTheme();
 
   const fetchVoting = async () => {
     if (!id) return;
@@ -229,13 +242,13 @@ const VotingDetails = () => {
   const getStatusColor = (status: VotingStatus) => {
     switch (status) {
       case 'IN_PROGRESS':
-        return 'success';
+        return theme.palette.success.main;
       case 'FINISHED':
-        return 'error';
+        return theme.palette.error.main;
       case 'NOT_STARTED':
-        return 'warning';
+        return theme.palette.warning.main;
       default:
-        return 'default';
+        return theme.palette.text.secondary;
     }
   };
 
@@ -386,337 +399,699 @@ const VotingDetails = () => {
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          {voting.name}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {isCreator && (
-            <>
-              <Button
-                variant="outlined"
-                startIcon={<HowToVoteIcon />}
-                onClick={fetchVoteRequests}
-              >
-                Запросы на голосование
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<VisibilityIcon />}
-                onClick={fetchWatchRequests}
-              >
-                Запросы на наблюдение
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                Удалить
-              </Button>
-            </>
-          )}
-          {!isCreator && voting.status === 'IN_PROGRESS' && (
-            <>
-              <Button
-                variant="outlined"
-                onClick={() => handleRequestResponse(voteRequests[0].permissionId, true)}
-                disabled={requestLoading}
-              >
-                Запросить голосование
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => handleRequestResponse(watchRequests[0].permissionId, true)}
-                disabled={requestLoading}
-              >
-                Запросить наблюдение
-              </Button>
-            </>
-          )}
-        </Box>
-      </Box>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: theme.palette.background.default,
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        background: `radial-gradient(circle at 50% 0%, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 50%)`,
+        pointerEvents: 'none',
+      },
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        background: `radial-gradient(circle at 50% 100%, ${alpha(theme.palette.secondary.main, 0.08)} 0%, transparent 50%)`,
+        pointerEvents: 'none',
+      },
+    }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 6 }}>
+        <Box sx={{ mb: 4 }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{
+              mb: 3,
+              color: 'text.secondary',
+              '&:hover': {
+                background: alpha(theme.palette.primary.main, 0.04),
+              },
+            }}
+          >
+            Назад
+          </Button>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">Информация о голосовании</Typography>
-          <Chip
-            label={getStatusText(voting.status as VotingStatus)}
-            color={getStatusColor(voting.status as VotingStatus) as any}
-          />
-        </Box>
-        <Box sx={{ display: 'grid', gap: 2 }}>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Описание
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            mb: 4 
+          }}>
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 600,
+                background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.8)})`,
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              {voting?.name}
             </Typography>
-            <Typography>{voting.description}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Вопрос
-            </Typography>
-            <Typography>{voting.question}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Варианты ответов
-            </Typography>
-            <List>
-              {voting.answers.map((answer) => (
-                <ListItem key={answer.id}>
-                  <ListItemText primary={answer.description} />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                Дата начала
-              </Typography>
-              <Typography>{formatDate(voting.startDate)}</Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              {isCreator && (
+                <>
+                  <Button
+                    variant="outlined"
+                    startIcon={<HowToVoteIcon />}
+                    onClick={fetchVoteRequests}
+                    sx={{
+                      borderColor: alpha(theme.palette.primary.main, 0.3),
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        background: alpha(theme.palette.primary.main, 0.04),
+                      },
+                    }}
+                  >
+                    Запросы на голосование
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    onClick={fetchWatchRequests}
+                    sx={{
+                      borderColor: alpha(theme.palette.primary.main, 0.3),
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        background: alpha(theme.palette.primary.main, 0.04),
+                      },
+                    }}
+                  >
+                    Запросы на наблюдение
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => setShowDeleteDialog(true)}
+                    sx={{
+                      borderColor: alpha(theme.palette.error.main, 0.3),
+                      '&:hover': {
+                        borderColor: theme.palette.error.main,
+                        background: alpha(theme.palette.error.main, 0.04),
+                      },
+                    }}
+                  >
+                    Удалить
+                  </Button>
+                </>
+              )}
             </Box>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                Дата окончания
-              </Typography>
-              <Typography>{formatDate(voting.endDate)}</Typography>
-            </Box>
           </Box>
-        </Box>
-      </Paper>
 
-      {isCreator && voting.status === 'NOT_STARTED' && (
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Редактирование голосования
-          </Typography>
-          <Box sx={{ display: 'grid', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Название"
-              value={voting.name}
-              onChange={(e) => setVoting({ ...voting, name: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Описание"
-              value={voting.description}
-              onChange={(e) => setVoting({ ...voting, description: e.target.value })}
-              multiline
-              rows={3}
-            />
-            <TextField
-              fullWidth
-              label="Вопрос"
-              value={voting.question}
-              onChange={(e) => setVoting({ ...voting, question: e.target.value })}
-            />
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Варианты ответов
-              </Typography>
-              {editingAnswers.map((answer, index) => (
-                <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 4,
+                background: alpha(theme.palette.error.main, 0.1),
+                border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                borderRadius: 2,
+              }}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <Card sx={{ 
+            mb: 4,
+            background: alpha(theme.palette.background.paper, 0.6),
+            border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+            backdropFilter: 'blur(20px)',
+          }}>
+            <CardContent sx={{ p: 4 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 4 
+              }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <DescriptionIcon sx={{ color: theme.palette.primary.main }} />
+                  Информация о голосовании
+                </Typography>
+                <Chip
+                  label={getStatusText(voting?.status as VotingStatus)}
+                  sx={{
+                    background: alpha(getStatusColor(voting?.status as VotingStatus), 0.1),
+                    border: `1px solid ${alpha(getStatusColor(voting?.status as VotingStatus), 0.2)}`,
+                    color: getStatusColor(voting?.status as VotingStatus),
+                    fontWeight: 500,
+                  }}
+                />
+              </Box>
+
+              <Stack spacing={4}>
+                <Box>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary"
+                    sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <DescriptionIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                    Описание
+                  </Typography>
+                  <Typography>{voting?.description}</Typography>
+                </Box>
+
+                <Box>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary"
+                    sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <QuestionAnswerIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                    Вопрос
+                  </Typography>
+                  <Typography>{voting?.question}</Typography>
+                </Box>
+
+                <Box>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary"
+                    sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <QuestionAnswerIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                    Варианты ответов
+                  </Typography>
+                  <List>
+                    {voting?.answers.map((answer) => (
+                      <ListItem 
+                        key={answer.id}
+                        sx={{
+                          background: alpha(theme.palette.background.paper, 0.4),
+                          borderRadius: 2,
+                          mb: 1,
+                          border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                        }}
+                      >
+                        <ListItemText primary={answer.description} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
+                  gap: 3 
+                }}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="text.secondary"
+                      sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
+                      <AccessTimeIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                      Дата начала
+                    </Typography>
+                    <Typography>{formatDate(voting?.startDate || 0)}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="text.secondary"
+                      sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
+                      <AccessTimeIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                      Дата окончания
+                    </Typography>
+                    <Typography>{formatDate(voting?.endDate || 0)}</Typography>
+                  </Box>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {isCreator && voting?.status === 'NOT_STARTED' && (
+            <Card sx={{ 
+              mb: 4,
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              backdropFilter: 'blur(20px)',
+            }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mb: 4,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <EditIcon sx={{ color: theme.palette.primary.main }} />
+                  Редактирование голосования
+                </Typography>
+
+                <Stack spacing={3}>
                   <TextField
                     fullWidth
-                    value={answer}
-                    onChange={(e) => handleAnswerChange(index, e.target.value)}
+                    label="Название"
+                    value={voting.name}
+                    onChange={(e) => setVoting({ ...voting, name: e.target.value })}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: alpha(theme.palette.primary.main, 0.3),
+                        },
+                      },
+                    }}
                   />
-                  {editingAnswers.length > 1 && (
-                    <IconButton
-                      color="error"
-                      onClick={() => handleRemoveAnswer(index)}
+                  <TextField
+                    fullWidth
+                    label="Описание"
+                    value={voting.description}
+                    onChange={(e) => setVoting({ ...voting, description: e.target.value })}
+                    multiline
+                    rows={3}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: alpha(theme.palette.primary.main, 0.3),
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Вопрос"
+                    value={voting.question}
+                    onChange={(e) => setVoting({ ...voting, question: e.target.value })}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: alpha(theme.palette.primary.main, 0.3),
+                        },
+                      },
+                    }}
+                  />
+
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="text.secondary" 
+                      sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
                     >
-                      <DeleteIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                onClick={handleAddAnswer}
-                sx={{ mt: 1 }}
-              >
-                Добавить вариант
-              </Button>
-            </Box>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Дата начала"
-                type="datetime-local"
-                value={format(new Date(voting.startDate), "yyyy-MM-dd'T'HH:mm")}
-                onChange={(e) => setVoting({ ...voting, startDate: new Date(e.target.value).getTime() })}
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                fullWidth
-                label="Дата окончания"
-                type="datetime-local"
-                value={format(new Date(voting.endDate), "yyyy-MM-dd'T'HH:mm")}
-                onChange={(e) => setVoting({ ...voting, endDate: new Date(e.target.value).getTime() })}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button
-                variant="outlined"
-                onClick={() => setEditingAnswers(voting.answers.map(answer => answer.description))}
+                      <QuestionAnswerIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                      Варианты ответов
+                    </Typography>
+                    {editingAnswers.map((answer, index) => (
+                      <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                        <TextField
+                          fullWidth
+                          value={answer}
+                          onChange={(e) => handleAnswerChange(index, e.target.value)}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: alpha(theme.palette.primary.main, 0.3),
+                              },
+                            },
+                          }}
+                        />
+                        {editingAnswers.length > 1 && (
+                          <IconButton
+                            color="error"
+                            onClick={() => handleRemoveAnswer(index)}
+                            sx={{
+                              '&:hover': {
+                                background: alpha(theme.palette.error.main, 0.04),
+                              },
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ))}
+                    <Button
+                      variant="outlined"
+                      onClick={handleAddAnswer}
+                      sx={{ 
+                        mt: 2,
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
+                        '&:hover': {
+                          borderColor: theme.palette.primary.main,
+                          background: alpha(theme.palette.primary.main, 0.04),
+                        },
+                      }}
+                    >
+                      Добавить вариант
+                    </Button>
+                  </Box>
+
+                  <Box sx={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
+                    gap: 3 
+                  }}>
+                    <TextField
+                      fullWidth
+                      label="Дата начала"
+                      type="datetime-local"
+                      value={format(new Date(voting.startDate), "yyyy-MM-dd'T'HH:mm")}
+                      onChange={(e) => setVoting({ ...voting, startDate: new Date(e.target.value).getTime() })}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: alpha(theme.palette.primary.main, 0.3),
+                          },
+                        },
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Дата окончания"
+                      type="datetime-local"
+                      value={format(new Date(voting.endDate), "yyyy-MM-dd'T'HH:mm")}
+                      onChange={(e) => setVoting({ ...voting, endDate: new Date(e.target.value).getTime() })}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: alpha(theme.palette.primary.main, 0.3),
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setEditingAnswers(voting.answers.map(answer => answer.description))}
+                      sx={{
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
+                        '&:hover': {
+                          borderColor: theme.palette.primary.main,
+                          background: alpha(theme.palette.primary.main, 0.04),
+                        },
+                      }}
+                    >
+                      Отмена
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={handleSave}
+                      sx={{
+                        background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                        '&:hover': {
+                          background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 6px 25px ${alpha(theme.palette.primary.main, 0.4)}`,
+                        },
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      Сохранить
+                    </Button>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+
+          {canVote && !votedSuccessfully && (
+            <Card sx={{ 
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              backdropFilter: 'blur(20px)',
+            }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mb: 4,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <HowToVoteIcon sx={{ color: theme.palette.primary.main }} />
+                  Ваш голос
+                </Typography>
+
+                <FormControl component="fieldset">
+                  <RadioGroup
+                    value={selectedAnswers[0] || ''}
+                    onChange={(e) => setSelectedAnswers([e.target.value])}
+                  >
+                    {voting?.answers.map((answer) => (
+                      <FormControlLabel
+                        key={answer.id}
+                        value={answer.id}
+                        control={<Radio />}
+                        label={answer.description}
+                        sx={{
+                          mb: 2,
+                          p: 2,
+                          borderRadius: 2,
+                          background: alpha(theme.palette.background.paper, 0.4),
+                          border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                          '&:hover': {
+                            background: alpha(theme.palette.primary.main, 0.04),
+                            borderColor: alpha(theme.palette.primary.main, 0.3),
+                          },
+                        }}
+                      />
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              </CardContent>
+            </Card>
+          )}
+
+          {voting?.status === 'FINISHED' && (
+            <Card sx={{ 
+              mt: 4,
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              backdropFilter: 'blur(20px)',
+            }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    mb: 4,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <BarChartIcon sx={{ color: theme.palette.primary.main }} />
+                  Результаты голосования
+                </Typography>
+                
+                {loading ? (
+                  <Box display="flex" justifyContent="center" p={3}>
+                    <CircularProgress />
+                  </Box>
+                ) : error ? (
+                  <Alert severity="error">{error}</Alert>
+                ) : results ? (
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mb: 4,
+                        fontWeight: 500,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      Всего голосов: {calculateTotalVotes()}
+                    </Typography>
+                    
+                    <List>
+                      {Object.entries(results.results).map(([answer, count]) => {
+                        const percentage = calculatePercentage(count);
+                        return (
+                          <ListItem 
+                            key={answer}
+                            sx={{
+                              mb: 2,
+                              p: 2,
+                              borderRadius: 2,
+                              background: alpha(theme.palette.background.paper, 0.4),
+                              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                            }}
+                          >
+                            <Box sx={{ width: '100%' }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="body1">{answer}</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {count} голосов ({percentage.toFixed(1)}%)
+                                </Typography>
+                              </Box>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={percentage} 
+                                sx={{ 
+                                  height: 10, 
+                                  borderRadius: 5,
+                                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                  '& .MuiLinearProgress-bar': {
+                                    borderRadius: 5,
+                                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  </Box>
+                ) : (
+                  <Alert 
+                    severity="info"
+                    sx={{
+                      background: alpha(theme.palette.info.main, 0.1),
+                      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                      borderRadius: 2,
+                    }}
+                  >
+                    Результаты голосования пока недоступны
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {renderRequestsDialog(
+            voteRequestsDialogOpen,
+            () => setVoteRequestsDialogOpen(false),
+            'Запросы на голосование',
+            voteRequests,
+            handleSubmitVoteRequests
+          )}
+
+          {renderRequestsDialog(
+            watchRequestsDialogOpen,
+            () => setWatchRequestsDialogOpen(false),
+            'Запросы на наблюдение',
+            watchRequests,
+            handleSubmitWatchRequests
+          )}
+
+          <Dialog
+            open={showVoteDialog}
+            onClose={() => setShowVoteDialog(false)}
+            PaperProps={{
+              sx: {
+                background: alpha(theme.palette.background.paper, 0.95),
+                backdropFilter: 'blur(20px)',
+                borderRadius: 2,
+              }
+            }}
+          >
+            <DialogTitle>Подтверждение голоса</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Вы уверены, что хотите проголосовать за выбранные варианты? После отправки голоса его нельзя будет изменить.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                onClick={() => setShowVoteDialog(false)}
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': {
+                    background: alpha(theme.palette.primary.main, 0.04),
+                  },
+                }}
               >
                 Отмена
               </Button>
-              <Button
+              <Button 
+                onClick={handleVote} 
                 variant="contained"
-                onClick={handleSave}
+                sx={{
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  '&:hover': {
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 6px 25px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  },
+                  transition: 'all 0.3s ease',
+                }}
               >
-                Сохранить
+                Подтвердить
               </Button>
-            </Box>
-          </Box>
-        </Paper>
-      )}
+            </DialogActions>
+          </Dialog>
 
-      {canVote && !votedSuccessfully && (
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Ваш голос
-          </Typography>
-          <FormControl component="fieldset">
-            <RadioGroup
-              value={selectedAnswers[0] || ''}
-              onChange={(e) => setSelectedAnswers([e.target.value])}
-            >
-              {voting.answers.map((answer) => (
-                <FormControlLabel
-                  key={answer.id}
-                  value={answer.id}
-                  control={<Radio />}
-                  label={answer.description}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
-        </Paper>
-      )}
-
-      {voting.status === 'FINISHED' && (
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Результаты голосования
-          </Typography>
-          
-          {loading ? (
-            <Box display="flex" justifyContent="center" p={3}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error">{error}</Alert>
-          ) : results ? (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Всего голосов: {calculateTotalVotes()}
-              </Typography>
-              
-              <List>
-                {Object.entries(results.results).map(([answer, count]) => {
-                  const percentage = calculatePercentage(count);
-                  return (
-                    <ListItem key={answer}>
-                      <Box sx={{ width: '100%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body1">{answer}</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {count} голосов ({percentage.toFixed(1)}%)
-                          </Typography>
-                        </Box>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={percentage} 
-                          sx={{ 
-                            height: 10, 
-                            borderRadius: 5,
-                            backgroundColor: 'grey.200',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 5,
-                            }
-                          }}
-                        />
-                      </Box>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </Box>
-          ) : (
-            <Alert severity="info">Результаты голосования пока недоступны</Alert>
-          )}
-        </Paper>
-      )}
-
-      {renderRequestsDialog(
-        voteRequestsDialogOpen,
-        () => setVoteRequestsDialogOpen(false),
-        'Запросы на голосование',
-        voteRequests,
-        handleSubmitVoteRequests
-      )}
-
-      {renderRequestsDialog(
-        watchRequestsDialogOpen,
-        () => setWatchRequestsDialogOpen(false),
-        'Запросы на наблюдение',
-        watchRequests,
-        handleSubmitWatchRequests
-      )}
-
-      <Dialog
-        open={showVoteDialog}
-        onClose={() => setShowVoteDialog(false)}
-      >
-        <DialogTitle>Подтверждение голоса</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Вы уверены, что хотите проголосовать за выбранные варианты? После отправки голоса его нельзя будет изменить.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowVoteDialog(false)}>
-            Отмена
-          </Button>
-          <Button onClick={handleVote} variant="contained">
-            Подтвердить
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-      >
-        <DialogTitle>Удаление голосования</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Вы уверены, что хотите удалить это голосование? Это действие нельзя отменить.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeleteDialog(false)}>
-            Отмена
-          </Button>
-          <Button onClick={handleDelete} color="error">
-            Удалить
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <Dialog
+            open={showDeleteDialog}
+            onClose={() => setShowDeleteDialog(false)}
+            PaperProps={{
+              sx: {
+                background: alpha(theme.palette.background.paper, 0.95),
+                backdropFilter: 'blur(20px)',
+                borderRadius: 2,
+              }
+            }}
+          >
+            <DialogTitle>Удаление голосования</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Вы уверены, что хотите удалить это голосование? Это действие нельзя отменить.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                onClick={() => setShowDeleteDialog(false)}
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': {
+                    background: alpha(theme.palette.primary.main, 0.04),
+                  },
+                }}
+              >
+                Отмена
+              </Button>
+              <Button 
+                onClick={handleDelete} 
+                color="error"
+                sx={{
+                  background: alpha(theme.palette.error.main, 0.1),
+                  border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                  '&:hover': {
+                    background: alpha(theme.palette.error.main, 0.2),
+                  },
+                }}
+              >
+                Удалить
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+      </Container>
     </Box>
   );
 };

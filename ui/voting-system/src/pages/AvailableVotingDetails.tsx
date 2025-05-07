@@ -21,6 +21,14 @@ import {
   DialogActions,
   TextField,
   LinearProgress,
+  Container,
+  useTheme,
+  alpha,
+  Card,
+  CardContent,
+  Stack,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -35,8 +43,15 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { 
+  HowToVote as VoteIcon,
+  Visibility as WatchIcon,
+  AccessTime as TimeIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
+  Info as InfoIcon,
+  ArrowBack as BackIcon,
+} from '@mui/icons-material';
 import { 
   parseRsaPemToHex, 
   getPublicKey, 
@@ -78,6 +93,20 @@ const AvailableVotingDetails: React.FC = () => {
   const [votingResults, setVotingResults] = useState<CheckVotingResultsResponse | null>(null);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [resultsError, setResultsError] = useState<string | null>(null);
+  const theme = useTheme();
+
+  const getStatusColor = (status: VotingStatus) => {
+    switch (status) {
+      case 'IN_PROGRESS':
+        return theme.palette.success.main;
+      case 'FINISHED':
+        return theme.palette.error.main;
+      case 'NOT_STARTED':
+        return theme.palette.warning.main;
+      default:
+        return theme.palette.text.secondary;
+    }
+  };
 
   useEffect(() => {
     fetchVoting();
@@ -241,28 +270,116 @@ const AvailableVotingDetails: React.FC = () => {
             color="primary"
             onClick={handleRequestVote}
             disabled={votingLoading}
-            startIcon={<HowToVoteIcon />}
+            startIcon={<VoteIcon />}
+            sx={{
+              borderColor: alpha(theme.palette.primary.main, 0.3),
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                background: alpha(theme.palette.primary.main, 0.04),
+              },
+            }}
           >
             Запросить право голоса
           </Button>
         );
       case 'CREATOR':
-        return <Alert severity="info">Вы создатель этого голосования</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.info.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <InfoIcon sx={{ color: theme.palette.info.main }} />
+            <Typography color="text.primary">
+              Вы создатель этого голосования
+            </Typography>
+          </Box>
+        );
       case 'REQUESTED':
-        return <Alert severity="info">Ваш запрос на голосование находится на рассмотрении</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.warning.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <TimeIcon sx={{ color: theme.palette.warning.main }} />
+            <Typography color="text.primary">
+              Ваш запрос на голосование находится на рассмотрении
+            </Typography>
+          </Box>
+        );
       case 'APPROVED':
-        return <Alert severity="success">У вас есть право голоса</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.success.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <CheckIcon sx={{ color: theme.palette.success.main }} />
+            <Typography color="text.primary">
+              У вас есть право голоса
+            </Typography>
+          </Box>
+        );
       case 'REJECTED':
-        return <Alert severity="error">Ваш запрос на голосование был отклонен</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.error.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <ErrorIcon sx={{ color: theme.palette.error.main }} />
+            <Typography color="text.primary">
+              Ваш запрос на голосование был отклонен
+            </Typography>
+          </Box>
+        );
       case 'USED':
         return (
           <Box>
-            <Alert severity="info" sx={{ mb: 2 }}>Вы уже проголосовали</Alert>
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: 2,
+              background: alpha(theme.palette.info.main, 0.08),
+              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              mb: 2,
+            }}>
+              <CheckIcon sx={{ color: theme.palette.info.main }} />
+              <Typography color="text.primary">
+                Вы уже проголосовали
+              </Typography>
+            </Box>
             <Button
               variant="outlined"
               color="primary"
               onClick={() => setShowCheckVoteDialog(true)}
-              startIcon={<HowToVoteIcon />}
+              startIcon={<VoteIcon />}
+              sx={{
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                '&:hover': {
+                  borderColor: theme.palette.primary.main,
+                  background: alpha(theme.palette.primary.main, 0.04),
+                },
+              }}
             >
               Проверить голос
             </Button>
@@ -282,53 +399,128 @@ const AvailableVotingDetails: React.FC = () => {
             color="secondary"
             onClick={handleRequestWatch}
             disabled={votingLoading}
-            startIcon={<VisibilityIcon />}
+            startIcon={<WatchIcon />}
+            sx={{
+              borderColor: alpha(theme.palette.secondary.main, 0.3),
+              '&:hover': {
+                borderColor: theme.palette.secondary.main,
+                background: alpha(theme.palette.secondary.main, 0.04),
+              },
+            }}
           >
             Запросить право наблюдения
           </Button>
         );
       case 'CREATOR':
-        if (voting!!.status !== 'NOT_STARTED') {
             return (
               <Box>
-                <Alert severity="info" sx={{ mb: 2 }}>Вы создатель этого голосования</Alert>
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: 2,
+              background: alpha(theme.palette.info.main, 0.08),
+              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              mb: 2,
+            }}>
+              <InfoIcon sx={{ color: theme.palette.info.main }} />
+              <Typography color="text.primary">
+                Вы создатель этого голосования
+              </Typography>
+            </Box>
+            {voting && voting.status !== 'NOT_STARTED' && (
             <Button
               variant="outlined"
               color="secondary"
               onClick={handleCheckAllVotes}
               disabled={allVotesLoading}
-              startIcon={<VisibilityIcon />}
+                startIcon={<WatchIcon />}
+                sx={{
+                  borderColor: alpha(theme.palette.secondary.main, 0.3),
+                  '&:hover': {
+                    borderColor: theme.palette.secondary.main,
+                    background: alpha(theme.palette.secondary.main, 0.04),
+                  },
+                }}
             >
               Проверить цепочку голосов
             </Button>
+            )}
           </Box>
         );
-      } else {
-        return <Alert severity="info" sx={{ mb: 2 }}>Вы создатель этого голосования</Alert>;
-      }
       case 'REQUESTED':
-        return <Alert severity="info">Ваш запрос на наблюдение находится на рассмотрении</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.warning.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <TimeIcon sx={{ color: theme.palette.warning.main }} />
+            <Typography color="text.primary">
+              Ваш запрос на наблюдение находится на рассмотрении
+            </Typography>
+          </Box>
+        );
       case 'APPROVED':
-        if (voting!!.status !== 'NOT_STARTED') {  
           return (
           <Box>
-            <Alert severity="success" sx={{ mb: 2 }}>У вас есть право наблюдения</Alert>
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: 2,
+              background: alpha(theme.palette.success.main, 0.08),
+              border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              mb: 2,
+            }}>
+              <CheckIcon sx={{ color: theme.palette.success.main }} />
+              <Typography color="text.primary">
+                У вас есть право наблюдения
+              </Typography>
+            </Box>
+            {voting && voting.status !== 'NOT_STARTED' && (
             <Button
               variant="outlined"
               color="secondary"
               onClick={handleCheckAllVotes}
               disabled={allVotesLoading}
-              startIcon={<VisibilityIcon />}
+                startIcon={<WatchIcon />}
+                sx={{
+                  borderColor: alpha(theme.palette.secondary.main, 0.3),
+                  '&:hover': {
+                    borderColor: theme.palette.secondary.main,
+                    background: alpha(theme.palette.secondary.main, 0.04),
+                  },
+                }}
             >
               Проверить цепочку голосов
             </Button>
+            )}
           </Box>
         );
-      } else {
-        return <Alert severity="success" sx={{ mb: 2 }}>У вас есть право наблюдения</Alert>;
-      }
       case 'REJECTED':
-        return <Alert severity="error">Ваш запрос на наблюдение был отклонен</Alert>;
+        return (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2,
+            background: alpha(theme.palette.error.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}>
+            <ErrorIcon sx={{ color: theme.palette.error.main }} />
+            <Typography color="text.primary">
+              Ваш запрос на наблюдение был отклонен
+            </Typography>
+          </Box>
+        );
       default:
         return null;
     }
@@ -388,76 +580,320 @@ const AvailableVotingDetails: React.FC = () => {
   const isActive = voting.status === 'IN_PROGRESS';
 
   return (
-    <Box p={3}>
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" component="h1">
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: theme.palette.background.default,
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        background: `radial-gradient(circle at 50% 0%, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 50%)`,
+        pointerEvents: 'none',
+      },
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        background: `radial-gradient(circle at 50% 100%, ${alpha(theme.palette.secondary.main, 0.08)} 0%, transparent 50%)`,
+        pointerEvents: 'none',
+      },
+    }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ py: 6 }}>
+          {/* Кнопка назад */}
+          <Button
+            startIcon={<BackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ 
+              mb: 4,
+              color: 'text.secondary',
+              '&:hover': {
+                background: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            Назад к списку
+          </Button>
+
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : error || !voting ? (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                background: alpha(theme.palette.error.main, 0.1),
+                border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                borderRadius: 2,
+              }}
+            >
+              {error || 'Голосование не найдено'}
+            </Alert>
+          ) : (
+            <>
+              {/* Основная информация */}
+              <Card sx={{ 
+                mb: 4,
+                background: alpha(theme.palette.background.paper, 0.6),
+                border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                backdropFilter: 'blur(20px)',
+              }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                    <Typography 
+                      variant="h4" 
+                      component="h1"
+                      sx={{
+                        fontWeight: 600,
+                        background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.8)})`,
+                        backgroundClip: 'text',
+                        textFillColor: 'transparent',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
             {voting.name}
           </Typography>
           <Chip
             label={voting.status === 'NOT_STARTED' ? 'Не начато' :
                    voting.status === 'IN_PROGRESS' ? 'В процессе' : 'Завершено'}
-            color={voting.status === 'IN_PROGRESS' ? 'success' :
-                   voting.status === 'FINISHED' ? 'error' : 'default'}
+                      sx={{
+                        background: `${alpha(getStatusColor(voting.status), 0.1)}`,
+                        color: getStatusColor(voting.status),
+                        border: `1px solid ${alpha(getStatusColor(voting.status), 0.2)}`,
+                        fontWeight: 500,
+                        px: 1,
+                      }}
           />
         </Box>
 
-        <Typography variant="body1" paragraph>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary"
+                    sx={{ 
+                      mb: 4,
+                      lineHeight: 1.7,
+                    }}
+                  >
           {voting.description}
         </Typography>
 
-        <Box mb={2}>
-          <Typography variant="subtitle1" gutterBottom>
-            Вопрос:
+                  <Stack spacing={3}>
+                    <Box>
+                      <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                          fontWeight: 600,
+                          mb: 1,
+                          color: 'text.primary',
+                        }}
+                      >
+                        Вопрос голосования
           </Typography>
-          <Typography variant="body1">
+                      <Typography 
+                        variant="body1"
+                        sx={{ 
+                          color: 'text.secondary',
+                          opacity: 0.9,
+                        }}
+                      >
             {voting.question}
           </Typography>
         </Box>
 
-        <Box mb={2}>
-          <Typography variant="subtitle1" gutterBottom>
-            Варианты ответов:
+                    <Box>
+                      <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                          fontWeight: 600,
+                          mb: 1,
+                          color: 'text.primary',
+                        }}
+                      >
+                        Варианты ответов
           </Typography>
-          <List>
+                      <Stack spacing={1}>
             {voting.answers.map((answer) => (
-              <ListItem key={answer.id}>
-                <ListItemText primary={answer.description} />
-              </ListItem>
-            ))}
-          </List>
+                          <Box
+                            key={answer.id}
+                            sx={{
+                              p: 2,
+                              borderRadius: 2,
+                              background: alpha(theme.palette.background.paper, 0.4),
+                              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                            }}
+                          >
+                            <Typography variant="body1">
+                              {answer.description}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
         </Box>
 
-        <Box mb={2}>
-          <Typography variant="subtitle1" gutterBottom>
-            Сроки проведения:
+                    <Box>
+                      <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                          fontWeight: 600,
+                          mb: 1,
+                          color: 'text.primary',
+                        }}
+                      >
+                        Сроки проведения
           </Typography>
+                      <Stack direction="row" spacing={3}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                          <TimeIcon sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }} />
           <Typography variant="body1">
-            Начало: {format(voting.startDate, 'dd MMMM yyyy HH:mm', { locale: ru })}
+                            {format(voting.startDate, 'dd MMMM yyyy HH:mm', { locale: ru })}
           </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                          <TimeIcon sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }} />
           <Typography variant="body1">
-            Окончание: {format(voting.endDate, 'dd MMMM yyyy HH:mm', { locale: ru })}
+                            {format(voting.endDate, 'dd MMMM yyyy HH:mm', { locale: ru })}
           </Typography>
         </Box>
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
 
-        <Divider sx={{ my: 2 }} />
-
+              {/* Действия */}
+              <Stack spacing={3}>
         {isActive && (
+                  <Box sx={{ 
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                    gap: 3,
+                  }}>
+                    {/* Блок голосования */}
+                    <Card sx={{ 
+                      background: alpha(theme.palette.background.paper, 0.6),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      backdropFilter: 'blur(20px)',
+                    }}>
+                      <CardContent sx={{ p: 4 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          mb: 3,
+                          gap: 2,
+                        }}>
+                          <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '12px',
+                            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                          }}>
+                            <VoteIcon />
+                          </Box>
           <Box>
-            <Box mb={2}>
-              {getVoteRequestButton()}
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                fontWeight: 600,
+                                background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.8)})`,
+                                backgroundClip: 'text',
+                                textFillColor: 'transparent',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                              }}
+                            >
+                              Голосование
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              color="text.secondary"
+                            >
+                              Управление вашим участием в голосовании
+                            </Typography>
             </Box>
           </Box>
-        )}
+                        <Box>
+                          {getVoteRequestButton()}
+                        </Box>
+                      </CardContent>
+                    </Card>
 
-        {
+                    {/* Блок наблюдения */}
+                    <Card sx={{ 
+                      background: alpha(theme.palette.background.paper, 0.6),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      backdropFilter: 'blur(20px)',
+                    }}>
+                      <CardContent sx={{ p: 4 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          mb: 3,
+                          gap: 2,
+                        }}>
+                          <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '12px',
+                            background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                          }}>
+                            <WatchIcon />
+                          </Box>
+                          <Box>
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                fontWeight: 600,
+                                background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.8)})`,
+                                backgroundClip: 'text',
+                                textFillColor: 'transparent',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                              }}
+                            >
+                              Наблюдение
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              color="text.secondary"
+                            >
+                              Проверка и мониторинг голосования
+                            </Typography>
+                          </Box>
+                        </Box>
           <Box>
             {getWatchRequestButton()}
           </Box>
-        }
+                      </CardContent>
+                    </Card>
+                  </Box>
+                )}
 
         {!isActive && (
-          <Alert severity="info">
+                  <Alert 
+                    severity="info"
+                    sx={{ 
+                      background: alpha(theme.palette.info.main, 0.1),
+                      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                      borderRadius: 2,
+                    }}
+                  >
             {voting.status === 'NOT_STARTED' 
               ? 'Голосование еще не началось'
               : 'Голосование завершено'}
@@ -465,24 +901,139 @@ const AvailableVotingDetails: React.FC = () => {
         )}
 
         {isActive && canVote && (
-          <Box mt={2}>
             <Button
               variant="contained"
-              color="primary"
               onClick={handleVoteClick}
               disabled={votingLoading}
-              startIcon={<HowToVoteIcon />}
+                    startIcon={<VoteIcon />}
+                    sx={{
+                      py: 2,
+                      px: 4,
+                      borderRadius: 3,
+                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                      boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                      '&:hover': {
+                        background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 6px 25px ${alpha(theme.palette.primary.main, 0.4)}`,
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
             >
               Проголосовать
             </Button>
-          </Box>
-        )}
-      </Paper>
+                )}
+              </Stack>
 
-      <Dialog open={showVoteDialog} onClose={handleVoteDialogClose}>
-        <DialogTitle>Голосование</DialogTitle>
+              {/* Результаты */}
+              {voting.status === 'FINISHED' && (
+                <Card sx={{ 
+                  mt: 4,
+                  background: alpha(theme.palette.background.paper, 0.6),
+                  border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                  backdropFilter: 'blur(20px)',
+                }}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Typography 
+                      variant="h5" 
+                      sx={{ 
+                        fontWeight: 600,
+                        mb: 3,
+                      }}
+                    >
+                      Результаты голосования
+                    </Typography>
+                    
+                    {resultsLoading ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                        <CircularProgress />
+          </Box>
+                    ) : resultsError ? (
+                      <Alert 
+                        severity="error"
+                        sx={{ 
+                          background: alpha(theme.palette.error.main, 0.1),
+                          border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                          borderRadius: 2,
+                        }}
+                      >
+                        {resultsError}
+                      </Alert>
+                    ) : votingResults ? (
+                      <Box>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            mb: 3,
+                            color: 'text.secondary',
+                          }}
+                        >
+                          Всего голосов: {calculateTotalVotes()}
+                        </Typography>
+                        
+                        <Stack spacing={3}>
+                          {Object.entries(votingResults.results).map(([answer, count]) => {
+                            const percentage = calculatePercentage(count);
+                            return (
+                              <Box key={answer}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                  <Typography variant="body1">{answer}</Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {count} голосов ({percentage.toFixed(1)}%)
+                                  </Typography>
+                                </Box>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={percentage} 
+                                  sx={{ 
+                                    height: 8, 
+                                    borderRadius: 4,
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                    '& .MuiLinearProgress-bar': {
+                                      borderRadius: 4,
+                                      background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            );
+                          })}
+                        </Stack>
+                      </Box>
+                    ) : (
+                      <Alert 
+                        severity="info"
+                        sx={{ 
+                          background: alpha(theme.palette.info.main, 0.1),
+                          border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                          borderRadius: 2,
+                        }}
+                      >
+                        Результаты голосования пока недоступны
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </Box>
+      </Container>
+
+      {/* Диалоги */}
+      <Dialog 
+        open={showVoteDialog} 
+        onClose={handleVoteDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Голосование
+          </Typography>
+        </DialogTitle>
         <DialogContent>
-          <FormControl component="fieldset" sx={{ mt: 2 }}>
+          <FormControl component="fieldset" sx={{ mt: 2, width: '100%' }}>
             <RadioGroup
               value={selectedAnswer}
               onChange={(e) => setSelectedAnswer(e.target.value)}
@@ -493,98 +1044,350 @@ const AvailableVotingDetails: React.FC = () => {
                   value={answer.id}
                   control={<Radio />}
                   label={answer.description}
+                  sx={{
+                    p: 2,
+                    m: 0,
+                    mb: 1,
+                    borderRadius: 2,
+                    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                    '&:hover': {
+                      background: alpha(theme.palette.primary.main, 0.04),
+                    },
+                  }}
                 />
               ))}
             </RadioGroup>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleVoteDialogClose}>Отмена</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleVoteDialogClose}
+            sx={{ 
+              color: 'text.secondary',
+              '&:hover': {
+                background: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            Отмена
+          </Button>
           <Button
             onClick={() => handleVote(selectedAnswer)}
             disabled={!selectedAnswer || votingLoading}
             variant="contained"
-            color="primary"
+            sx={{
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+              },
+            }}
           >
             {votingLoading ? 'Отправка...' : 'Проголосовать'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={showTokenDialog} onClose={handleTokenDialogClose}>
-        <DialogTitle>Голос успешно отправлен!</DialogTitle>
+      <Dialog 
+        open={showTokenDialog} 
+        onClose={handleTokenDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Голос успешно отправлен!
+          </Typography>
+        </DialogTitle>
         <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Обязательно сохраните у себя токен для дальнейшего отслеживания!!!!
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 3,
+              background: alpha(theme.palette.warning.main, 0.1),
+              border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+              borderRadius: 2,
+            }}
+          >
+            Обязательно сохраните у себя токен для дальнейшего отслеживания!
           </Alert>
-          <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              wordBreak: 'break-all',
+              p: 2,
+              borderRadius: 2,
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              fontFamily: 'monospace',
+            }}
+          >
             {voteToken}
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleTokenDialogClose} color="primary">
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleTokenDialogClose}
+            variant="contained"
+            sx={{
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+              },
+            }}
+          >
             OK
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={showCheckVoteDialog} onClose={handleCheckVoteDialogClose}>
-        <DialogTitle>Проверка голоса</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            Введите токен, полученный вами при голосовании
+      <Dialog 
+        open={showCheckVoteDialog} 
+        onClose={handleCheckVoteDialogClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: alpha(theme.palette.background.paper, 0.8),
+            backdropFilter: 'blur(20px)',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+          }}>
+            <Box sx={{
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+            }}>
+              <VoteIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Проверка голоса
           </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Введите токен для проверки вашего голоса
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
           <TextField
             fullWidth
             value={checkVoteToken}
             onChange={(e) => setCheckVoteToken(e.target.value)}
             placeholder="Введите токен"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mt: 3,
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '& fieldset': {
+                  borderColor: alpha(theme.palette.divider, 0.1),
+                },
+                '&:hover fieldset': {
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+            }}
           />
           {checkVoteError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert 
+              severity="error"
+              sx={{ 
+                mb: 3,
+                background: alpha(theme.palette.error.main, 0.1),
+                border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                borderRadius: 2,
+              }}
+            >
               {checkVoteError}
             </Alert>
           )}
           {checkVoteResult && (
-            <Box>
-              <Alert severity="success" sx={{ mb: 2 }}>
+            <Card sx={{ 
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              borderRadius: 2,
+            }}>
+              <CardContent>
+                <Alert 
+                  severity="success"
+                  sx={{ 
+                    mb: 3,
+                    background: alpha(theme.palette.success.main, 0.1),
+                    border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                    borderRadius: 2,
+                  }}
+                >
                 Голос успешно проверен!
               </Alert>
-              <Typography variant="subtitle2" gutterBottom>
-                Информация о голосе:
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      ID голоса
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                ID голоса: {checkVoteResult.voteId}
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.voteId}
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                ID пользователя: {checkVoteResult.userId}
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      ID пользователя
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                Токен: {checkVoteResult.voteToken}
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.userId}
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                Зашифрованный голос: {checkVoteResult.encryptedVote}
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      Токен
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                Доказательство: {checkVoteResult.zeroKnowledgeProof}
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.voteToken}
               </Typography>
-              <Typography variant="body2">
-                Время: {format(checkVoteResult.timestamp * 1000, 'dd MMMM yyyy HH:mm:ss', { locale: ru })}
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      Зашифрованный голос
               </Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                Хеш блока: {checkVoteResult.blockHash}
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.encryptedVote}
               </Typography>
             </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      Доказательство
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.zeroKnowledgeProof}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      Время
+                    </Typography>
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {format(checkVoteResult.timestamp * 1000, 'dd MMMM yyyy HH:mm:ss', { locale: ru })}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                      Хеш блока
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
+                      {checkVoteResult.blockHash}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCheckVoteDialogClose}>Закрыть</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleCheckVoteDialogClose}
+            sx={{ 
+              color: 'text.secondary',
+              '&:hover': {
+                background: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            Закрыть
+          </Button>
           <Button
             onClick={handleCheckVote}
             disabled={!checkVoteToken || checkVoteLoading}
             variant="contained"
-            color="primary"
+            sx={{
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+              },
+            }}
           >
             {checkVoteLoading ? 'Проверка...' : 'Проверить'}
           </Button>
@@ -596,52 +1399,156 @@ const AvailableVotingDetails: React.FC = () => {
         onClose={handleAllVotesDialogClose}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            background: alpha(theme.palette.background.paper, 0.8),
+            backdropFilter: 'blur(20px)',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          }
+        }}
       >
-        <DialogTitle>Цепочка голосов</DialogTitle>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+          }}>
+            <Box sx={{
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
+              background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+            }}>
+              <WatchIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Цепочка голосов
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Просмотр всех голосов в блокчейне
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
         <DialogContent>
           {allVotesError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert 
+              severity="error"
+              sx={{ 
+                mb: 3,
+                background: alpha(theme.palette.error.main, 0.1),
+                border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                borderRadius: 2,
+              }}
+            >
               {allVotesError}
             </Alert>
           )}
           {allVotesLoading ? (
-            <Box display="flex" justifyContent="center" p={3}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
               <CircularProgress />
             </Box>
           ) : (
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  mb: 3,
+                  color: 'text.secondary',
+                }}
+              >
                 Всего голосов: {allVotes.length}
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: 2,
+              }}>
                 {allVotes.map((vote, index) => (
-                  <Paper
+                  <Card
                     key={vote.voteId}
-                    elevation={3}
                     sx={{
-                      p: 2,
                       cursor: 'pointer',
-                      width: '200px',
+                      background: alpha(theme.palette.background.paper, 0.6),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      transition: 'all 0.2s ease',
                       '&:hover': {
-                        backgroundColor: 'action.hover',
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.1)}`,
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
                       },
                     }}
                     onClick={() => setSelectedVote(vote)}
                   >
-                    <Typography variant="subtitle2" gutterBottom>
+                    <CardContent>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 1,
+                        mb: 2,
+                      }}>
+                        <Box sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '8px',
+                          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: '0.875rem',
+                        }}>
+                          #{index + 1}
+                        </Box>
+                        <Typography 
+                          variant="subtitle2" 
+                          sx={{ 
+                            fontWeight: 600,
+                          }}
+                        >
                       Блок #{index + 1}
                     </Typography>
-                    <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+                      </Box>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          wordBreak: 'break-all',
+                          fontFamily: 'monospace',
+                          color: 'text.secondary',
+                          p: 1.5,
+                          borderRadius: 1,
+                          background: alpha(theme.palette.background.paper, 0.4),
+                          border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                        }}
+                      >
                       {vote.blockHash}
                     </Typography>
-                  </Paper>
+                    </CardContent>
+                  </Card>
                 ))}
               </Box>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAllVotesDialogClose}>Закрыть</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleAllVotesDialogClose}
+            variant="contained"
+            sx={{
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+              },
+            }}
+          >
+            Закрыть
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -650,122 +1557,160 @@ const AvailableVotingDetails: React.FC = () => {
         onClose={() => setSelectedVote(null)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            background: alpha(theme.palette.background.paper, 0.8),
+            backdropFilter: 'blur(20px)',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          }
+        }}
       >
-        <DialogTitle>Детали голоса</DialogTitle>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+          }}>
+            <Box sx={{
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+            }}>
+              <InfoIcon />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Детали голоса
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Информация о выбранном голосе
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
         <DialogContent>
           {selectedVote && (
-            <Box sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-              Информация о голосе
-            </Typography>
-            
-            <Box sx={{ ml: 1.5, '& > :not(:last-child)': { mb: 2 } }}>
+            <Card sx={{ 
+              background: alpha(theme.palette.background.paper, 0.6),
+              border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              borderRadius: 2,
+            }}>
+              <CardContent>
+                <Stack spacing={3}>
               <Box>
-                <Typography variant="overline" display="block" sx={{ lineHeight: 1.3, color: 'text.disabled' }}>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                   Токен
                 </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word', fontFamily: 'monospace' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
                   {selectedVote.voteToken}
                 </Typography>
               </Box>
-          
               <Box>
-                <Typography variant="overline" display="block" sx={{ lineHeight: 1.3, color: 'text.disabled' }}>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                   Зашифрованный голос
                 </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word', fontFamily: 'monospace' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
                   {selectedVote.encryptedVote}
                 </Typography>
               </Box>
-          
               <Box>
-                <Typography variant="overline" display="block" sx={{ lineHeight: 1.3, color: 'text.disabled' }}>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                   Доказательство
                 </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word', fontFamily: 'monospace' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
                   {selectedVote.zeroKnowledgeProof}
                 </Typography>
               </Box>
-          
               <Box>
-                <Typography variant="overline" display="block" sx={{ lineHeight: 1.3, color: 'text.disabled' }}>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                   Время
                 </Typography>
-                <Typography variant="body2">
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
                   {format(selectedVote.timestamp * 1000, 'dd MMMM yyyy HH:mm:ss', { locale: ru })}
                 </Typography>
               </Box>
-          
               <Box>
-                <Typography variant="overline" display="block" sx={{ lineHeight: 1.3, color: 'text.disabled' }}>
+                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                   Хеш блока
                 </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word', fontFamily: 'monospace' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        wordBreak: 'break-all', 
+                        fontFamily: 'monospace',
+                        p: 1.5,
+                        borderRadius: 1,
+                        background: alpha(theme.palette.background.paper, 0.4),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                      }}
+                    >
                   {selectedVote.blockHash}
                 </Typography>
               </Box>
-            </Box>
-          </Box>
+                </Stack>
+              </CardContent>
+            </Card>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSelectedVote(null)}>Закрыть</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setSelectedVote(null)}
+            variant="contained"
+            sx={{
+              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+              },
+            }}
+          >
+            Закрыть
+          </Button>
         </DialogActions>
       </Dialog>
-
-      {voting.status === 'FINISHED' && (
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Результаты голосования
-          </Typography>
-          
-          {resultsLoading ? (
-            <Box display="flex" justifyContent="center" p={3}>
-              <CircularProgress />
-            </Box>
-          ) : resultsError ? (
-            <Alert severity="error">{resultsError}</Alert>
-          ) : votingResults ? (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Всего голосов: {calculateTotalVotes()}
-              </Typography>
-              
-              <List>
-                {Object.entries(votingResults.results).map(([answer, count]) => {
-                  const percentage = calculatePercentage(count);
-                  return (
-                    <ListItem key={answer}>
-                      <Box sx={{ width: '100%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body1">{answer}</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {count} голосов ({percentage.toFixed(1)}%)
-                          </Typography>
-                        </Box>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={percentage} 
-                          sx={{ 
-                            height: 10, 
-                            borderRadius: 5,
-                            backgroundColor: 'grey.200',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 5,
-                            }
-                          }}
-                        />
-                      </Box>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </Box>
-          ) : (
-            <Alert severity="info">Результаты голосования пока недоступны</Alert>
-          )}
-        </Paper>
-      )}
     </Box>
   );
 };

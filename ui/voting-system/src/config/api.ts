@@ -149,7 +149,7 @@ const createApi = (): AxiosInstance => {
   api.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 && !error.config.url?.includes('/auth/api/v1/login')) {
         localStorage.removeItem('token');
         window.location.href = '/login';
       }

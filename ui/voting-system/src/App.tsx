@@ -1,37 +1,22 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Container } from '@mui/material';
-import { useAuth, AuthProvider } from './contexts/AuthContext';
-
-// Компоненты
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
+import { theme } from './theme';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
-import Home from './pages/Home';
-import Onboarding from './pages/Onboarding';
-import VotingList from './pages/VotingList';
-import VotingCreate from './pages/VotingCreate';
-import VotingDetails from './pages/VotingDetails';
-import AvailableVotingDetails from './pages/AvailableVotingDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
+import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
+import VotingDetails from './pages/VotingDetails';
+import VotingCreate from './pages/VotingCreate';
+import VotingList from './pages/VotingList';
+import AvailableVotingDetails from './pages/AvailableVotingDetails';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -52,31 +37,43 @@ const AppContent = () => {
 
   return (
     <Router>
-      <Header />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Routes>
-          <Route path="/" element={isAuthenticated ? <Home /> : <Onboarding />} />
-          <Route path="/votings" element={<VotingList />} />
-          <Route path="/votings/:id" element={<VotingDetails />} />
-          <Route path="/available-votings/:id" element={<AvailableVotingDetails />} />
-          <Route path="/votings/create" element={<VotingCreate />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </Container>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Header />
+        <Box sx={{ p: 3 }}>
+          <Routes>
+            <Route path="/" element={
+              isAuthenticated ? <Home /> : <Onboarding />
+            } />
+            <Route path="/login" element={
+              isAuthenticated ? <Navigate to="/" /> : <Login />
+            } />
+            <Route path="/register" element={
+              isAuthenticated ? <Navigate to="/" /> : <Register />
+            } />
+            <Route path="/profile" element={
+              isAuthenticated ? <Profile /> : <Navigate to="/login" />
+            } />
+            <Route path="/votings/create" element={
+              isAuthenticated ? <VotingCreate /> : <Navigate to="/login" />
+            } />
+            <Route path="/votings/:id" element={
+              isAuthenticated ? <VotingDetails /> : <Navigate to="/login" />
+            } />
+            <Route path="/votings" element={<VotingList />} />
+            <Route path="/available-votings/:id" element={<AvailableVotingDetails />} />
+          </Routes>
+        </Box>
+      </ThemeProvider>
     </Router>
   );
 };
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
