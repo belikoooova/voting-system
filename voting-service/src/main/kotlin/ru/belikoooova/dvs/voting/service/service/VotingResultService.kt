@@ -77,11 +77,11 @@ private val answerRepository: AnswerRepository) {
         }
 
         val allBlocks = blockchainGrpcClient.getAllBlocks(votingId.toString())
-        if (allBlocks.isEmpty()) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No votes found for this voting")
-        }
 
         val counts = mutableMapOf<String, Int>()
+        answerRepository.findAllByVotingId(votingId).forEach { answer ->
+            counts[answer.id.toString()] = 0
+        }
         allBlocks.forEach { block ->
             val answerId = cryptoGrpcClient.decrypt(block.encryptedVote)
             counts[answerId] = counts.getOrDefault(answerId, 0) + 1

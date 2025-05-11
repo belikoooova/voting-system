@@ -52,15 +52,15 @@ const AppContent = () => {
               isAuthenticated ? <Navigate to="/" /> : <Register />
             } />
             <Route path="/profile" element={
-              isAuthenticated ? <Profile /> : <Navigate to="/login" />
+              isAuthenticated ? <Profile /> : <Navigate to="/" />
             } />
             <Route path="/votings/create" element={
-              isAuthenticated ? <VotingCreate /> : <Navigate to="/login" />
+              isAuthenticated ? <VotingCreate /> : <Navigate to="/" />
             } />
             <Route path="/votings/:id" element={
-              isAuthenticated ? <VotingDetails /> : <Navigate to="/login" />
+              isAuthenticated ? <VotingDetails /> : <Navigate to="/" />
             } />
-            <Route path="/votings" element={<VotingList />} />
+            <Route path="/votings" element={<Home />} />
             <Route path="/available-votings/:id" element={<AvailableVotingDetails />} />
           </Routes>
         </Box>

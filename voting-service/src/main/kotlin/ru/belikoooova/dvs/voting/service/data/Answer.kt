@@ -30,4 +30,5 @@ class Answer(
 @Repository
 interface AnswerRepository : JpaRepository<Answer, UUID> {
     fun deleteAllByVotingId(votingId: UUID)
+    fun findAllByVotingId(votingId: UUID): List<Answer>
 }
