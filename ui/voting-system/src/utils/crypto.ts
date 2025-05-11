@@ -1,118 +1,68 @@
 import { cryptoApi, votingApi } from '../config/api';
 import { RSABSSA } from "@cloudflare/blindrsa-ts";
 import { pemToSpki, uint8ArrayToBase64, base64ToUint8Array } from "./encodingUtils";
-import { sha256 } from 'js-sha256';
-import { ec } from 'elliptic';
-import { publicEncrypt } from 'crypto';
 
-const curve = new ec('secp256k1');
-
-export const parseRsaPemToHex = (pem: string): { n: string; e: string } => {
-  try {
-    const base64 = pem
-      .replace('-----BEGIN PUBLIC KEY-----', '')
-      .replace('-----END PUBLIC KEY-----', '')
-      .replace(/\s/g, '');
-
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-
-    return {
-      n: '0x10001', 
-      e: '0x10001', 
-    };
-  } catch (error) {
-    console.error('Ошибка при парсинге RSA ключа:', error);
-    throw new Error('Не удалось распарсить RSA ключ');
-  }
-};
-
-export async function blindSignMessage(message: string): Promise<string> {
-  try {
-    console.log('Начало создания слепой подписи');
-    
-    const response = await cryptoApi.getPublicKey();
-    const pem = response.data.publicKey;
-    console.log('Получен публичный ключ:', pem);
-    
-    const spki = pemToSpki(pem);
-    console.log('Ключ преобразован в SPKI формат');
-
-    const publicKey = await crypto.subtle.importKey(
-      "spki",
-      spki,
-      { name: "RSA-PSS", hash: "SHA-384" },
-      true,
-      ["verify"]
-    );
-    console.log('Ключ импортирован в WebCrypto');
-
-    const suite = RSABSSA.SHA384.PSS.Randomized();
-    console.log('Выбран вариант PSS-подписи');
-
-    const encoder = new TextEncoder();
-    const msgBytes = encoder.encode(message);
-    const prepared = suite.prepare(msgBytes);
-    console.log('Сообщение подготовлено');
-
-    const { blindedMsg, inv } = await suite.blind(publicKey, prepared);
-    console.log('Создана слепая подпись');
-
-    const resp = await cryptoApi.sign({ blindedPublicKey: uint8ArrayToBase64(blindedMsg) });
-    const blindSigBuf = base64ToUint8Array(resp.data.blindSignature);
-    console.log('Получена подпись от сервера');
-
-    const signature = await suite.finalize(publicKey, prepared, blindSigBuf, inv);
-    console.log('Снята слепота с подписи');
-
-    const ok = await suite.verify(publicKey, signature, prepared);
-    if (!ok) throw new Error("Проверка слепой подписи не удалась");
-    console.log('Подпись успешно проверена');
-
-    return uint8ArrayToBase64(signature);
-  } catch (error) {
-    console.error('Ошибка при создании слепой подписи:', error);
-    throw new Error('Не удалось создать слепую подпись');
-  }
+async function importRsaPublicKey(pem: string): Promise<CryptoKey> {
+  const b64 = pem
+    .replace('-----BEGIN PUBLIC KEY-----','')
+    .replace('-----END PUBLIC KEY-----','')
+    .replace(/\s/g,'');
+  const der = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  return crypto.subtle.importKey(
+    'spki',
+    der.buffer,
+    { name: 'RSA-OAEP', hash: 'SHA-256' },
+    true,
+    ['encrypt']
+  );
 }
 
-export const encryptAnswer = async (answerId: string, publicKeyPem: string): Promise<string> => {
-  try {
-    const pemContents = publicKeyPem
-      .replace(/-----BEGIN PUBLIC KEY-----/, '')
-      .replace(/-----END PUBLIC KEY-----/, '')
-      .replace(/\s/g, '');
-    const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+export async function encryptAnswer(answerId: string, publicKeyPem: string): Promise<string> {
+  const key = await importRsaPublicKey(publicKeyPem);
+  const pt = new TextEncoder().encode(answerId);
+  const ct = await crypto.subtle.encrypt(
+    { name: 'RSA-OAEP' },
+    key,
+    pt
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(ct)));
+}
 
-    const publicKey = await crypto.subtle.importKey(
-      'spki',
-      binaryDer,
-      {
-        name: 'RSA-OAEP',
-        hash: 'SHA-256',
-      },
-      true,
-      ['encrypt']
-    );
+async function importRsaPssPublicKey(pem: string): Promise<CryptoKey> {
+  const b64 = pem
+    .replace('-----BEGIN PUBLIC KEY-----','')
+    .replace('-----END PUBLIC KEY-----','')
+    .replace(/\s/g,'');
+  const der = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  return crypto.subtle.importKey(
+    'spki',
+    der.buffer,
+    { name: 'RSA-PSS', hash: 'SHA-384' },
+    true,
+    ['verify']
+  );
+}
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(answerId);
+export async function blindSignMessage(message: string): Promise<string> {
+  const { data:{ publicKey: pem } } = await cryptoApi.getPublicKey();
+  const publicKey = await importRsaPssPublicKey(pem);
 
-    const encrypted = await crypto.subtle.encrypt(
-      { name: 'RSA-OAEP' },
-      publicKey,
-      data
-    );
-    
-    return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(encrypted))));
-  } catch (error) {
-    console.error('Ошибка при шифровании:', error);
-    throw new Error('Ошибка шифрования');
-  }
-};
+  const suite = RSABSSA.SHA384.PSS.Randomized();
+  const msgBytes = new TextEncoder().encode(message);
+  const prepared = suite.prepare(msgBytes);
+  const { blindedMsg, inv } = await suite.blind(publicKey, prepared);
+
+  const { data:{ blindSignature } } =
+    await cryptoApi.sign({ blindedPublicKey: uint8ArrayToBase64(blindedMsg) });
+
+  const sigBuf = base64ToUint8Array(blindSignature);
+  const signature = await suite.finalize(publicKey, prepared, sigBuf, inv);
+
+  const ok = await suite.verify(publicKey, signature, prepared);
+  if (!ok) throw new Error('Blind‐signature verification failed');
+
+  return uint8ArrayToBase64(signature);
+}
 
 export const getZKProof = async (votingId: string, userId: string): Promise<string> => {
   try {

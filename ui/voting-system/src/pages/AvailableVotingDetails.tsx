@@ -53,7 +53,6 @@ import {
   ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import { 
-  parseRsaPemToHex, 
   getPublicKey, 
   encryptVote, 
   blindSignMessage, 
@@ -1237,42 +1236,6 @@ const AvailableVotingDetails: React.FC = () => {
                 Голос успешно проверен!
               </Alert>
                 <Stack spacing={3}>
-                  <Box>
-                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                      ID голоса
-              </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        wordBreak: 'break-all', 
-                        fontFamily: 'monospace',
-                        p: 1.5,
-                        borderRadius: 1,
-                        background: alpha(theme.palette.background.paper, 0.4),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-                      }}
-                    >
-                      {checkVoteResult.voteId}
-              </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                      ID пользователя
-              </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        wordBreak: 'break-all', 
-                        fontFamily: 'monospace',
-                        p: 1.5,
-                        borderRadius: 1,
-                        background: alpha(theme.palette.background.paper, 0.4),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-                      }}
-                    >
-                      {checkVoteResult.userId}
-              </Typography>
-                  </Box>
                   <Box>
                     <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                       Токен

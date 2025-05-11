@@ -102,7 +102,7 @@ class CryptoService(private val properties: CryptoProperties) {
     }
 
     fun encrypt(plainText: String): String {
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding").apply {
+        val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding").apply {
             init(Cipher.ENCRYPT_MODE, publicKey)
         }
         val plainBytes = plainText.toByteArray(StandardCharsets.UTF_8)
@@ -111,7 +111,7 @@ class CryptoService(private val properties: CryptoProperties) {
     }
 
     fun decrypt(encryptedBase64: String): String {
-        val cipher = Cipher.getInstance(decryptAlgorithm).apply {
+        val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding").apply {
             init(Cipher.DECRYPT_MODE, privateKey)
         }
         val encryptedBytes = Base64.getDecoder().decode(encryptedBase64)
