@@ -1311,24 +1311,6 @@ const AvailableVotingDetails: React.FC = () => {
             </Box>
                   <Box>
                     <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                      Доказательство
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        wordBreak: 'break-all', 
-                        fontFamily: 'monospace',
-                        p: 1.5,
-                        borderRadius: 1,
-                        background: alpha(theme.palette.background.paper, 0.4),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-                      }}
-                    >
-                      {checkVoteResult.zeroKnowledgeProof}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
                       Время
                     </Typography>
                     <Typography 
@@ -1637,24 +1619,6 @@ const AvailableVotingDetails: React.FC = () => {
                       }}
                     >
                   {selectedVote.encryptedVote}
-                </Typography>
-              </Box>
-              <Box>
-                    <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                  Доказательство
-                </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        wordBreak: 'break-all', 
-                        fontFamily: 'monospace',
-                        p: 1.5,
-                        borderRadius: 1,
-                        background: alpha(theme.palette.background.paper, 0.4),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-                      }}
-                    >
-                  {selectedVote.zeroKnowledgeProof}
                 </Typography>
               </Box>
               <Box>

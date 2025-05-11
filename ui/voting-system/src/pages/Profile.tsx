@@ -224,7 +224,6 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Мои голосования */}
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 

@@ -127,7 +127,6 @@ export interface CheckVotingResultsResponse {
   results: Record<string, string>;
 }
 
-// Конфигурация API
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 const createApi = (): AxiosInstance => {
@@ -162,7 +161,6 @@ const createApi = (): AxiosInstance => {
 
 const api = createApi();
 
-// API методы
 export const authApi = {
   login: (data: LoginRequest) => api.post<AuthResponse>('/auth/api/v1/login', data),
   register: (data: RegisterRequest) => api.post<AuthResponse>('/auth/api/v1/register', data),
@@ -170,14 +168,12 @@ export const authApi = {
 };
 
 export const votingApi = {
-  // Управление голосованиями
   getMyVotings: () => api.get<Voting[]>('/voting/api/v1/my/votings'),
   getMyVoting: (id: string) => api.get<Voting>(`/voting/api/v1/my/votings/${id}`),
   createVoting: (data: CreateVotingRequest) => api.post<Voting>('/voting/api/v1/my/votings', data),
   editMyVoting: (id: string, data: CreateVotingRequest) => api.put<Voting>(`/voting/api/v1/my/votings/${id}`, data),
   deleteMyVoting: (id: string) => api.delete(`/voting/api/v1/my/votings/${id}`),
 
-  // Запросы на голосование и наблюдение
   getVoteRequests: () => api.get<WatchOrVoteRequest[]>('/voting/api/v1/my/votings/requests/vote'),
   getWatchRequests: () => api.get<WatchOrVoteRequest[]>('/voting/api/v1/my/votings/requests/watch'),
   answerVoteRequests: (answers: AnswerForWatchOrVoteRequest[]) => 
@@ -185,7 +181,6 @@ export const votingApi = {
   answerWatchRequests: (answers: AnswerForWatchOrVoteRequest[]) => 
     api.post('/voting/api/v1/my/votings/requests/watch', answers),
 
-  // Голосование
   getAvailableVotings: (filter?: VotingFilter) => {
     if (!filter) {
       return api.get<Voting[]>('/voting/api/v1/votings');
@@ -214,7 +209,6 @@ export const votingApi = {
   vote: (votingId: string, data: VoteRequest) => 
     api.post(`/voting/api/v1/votings/${votingId}/vote`, data),
 
-  // Результаты
   getVotingResults: (votingId: string) =>
     api.post<CheckVotingResultsResponse>(`/voting/api/v1/votings/${votingId}/results`),
   getVotingStatistics: (id: string) => api.get(`/voting/api/v1/votings/${id}/statistics`),

@@ -36,8 +36,6 @@ const AvailableVotingDetails: React.FC = () => {
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const userId = localStorage.getItem('userId') || '';
 
-  // ... existing useEffect and other functions ...
-
   const handleVote = async () => {
     if (!selectedAnswer || !id) return;
 
@@ -45,23 +43,18 @@ const AvailableVotingDetails: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // 1. Получаем публичный ключ
       const publicKey = await getPublicKey();
       console.log('Получен публичный ключ');
 
-      // 2. Шифруем голос
       const encryptedVote = await encryptAnswer(selectedAnswer.id, publicKey);
       console.log('Голос зашифрован');
 
-      // 3. Создаем слепую подпись
       const voteToken = await blindSignMessage(selectedAnswer.id);
       console.log('Создана слепая подпись');
 
-      // 4. Получаем доказательство с нулевым разглашением
       const zkProof = await getZKProof(id, userId);
       console.log('Получено доказательство с нулевым разглашением');
 
-      // 5. Отправляем голос
       await submitVote(
         id,
         userId,
@@ -72,7 +65,6 @@ const AvailableVotingDetails: React.FC = () => {
       );
       console.log('Голос успешно отправлен');
 
-      // 6. Показываем токен
       setVoteToken(voteToken);
       setShowTokenDialog(true);
       setVotingRequest((prev: VotingRequest | null) => prev ? { ...prev, status: 'USED' } : null);

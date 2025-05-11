@@ -157,7 +157,6 @@ const Home = () => {
     }}>
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ py: 6 }}>
-          {/* Заголовок и кнопка создания */}
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -213,8 +212,6 @@ const Home = () => {
             Создать голосование
           </Button>
         </Box>
-
-          {/* Фильтры */}
           <Box sx={{ 
             mb: 6,
             p: 4,

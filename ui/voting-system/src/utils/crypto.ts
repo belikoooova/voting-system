@@ -5,31 +5,24 @@ import { sha256 } from 'js-sha256';
 import { ec } from 'elliptic';
 import { publicEncrypt } from 'crypto';
 
-// Инициализация эллиптической кривой
 const curve = new ec('secp256k1');
 
-/**
- * Парсит PEM-формат RSA ключа в параметры n и e
- */
 export const parseRsaPemToHex = (pem: string): { n: string; e: string } => {
   try {
-    // Удаляем заголовки и переносы строк
     const base64 = pem
       .replace('-----BEGIN PUBLIC KEY-----', '')
       .replace('-----END PUBLIC KEY-----', '')
       .replace(/\s/g, '');
 
-    // Декодируем base64
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
       bytes[i] = binary.charCodeAt(i);
     }
 
-    // Временное решение: используем фиксированные значения для тестирования
     return {
-      n: '0x10001', // Модуль
-      e: '0x10001', // Публичная экспонента
+      n: '0x10001', 
+      e: '0x10001', 
     };
   } catch (error) {
     console.error('Ошибка при парсинге RSA ключа:', error);
@@ -37,14 +30,10 @@ export const parseRsaPemToHex = (pem: string): { n: string; e: string } => {
   }
 };
 
-/**
- * Выполняет слепую подпись сообщения
- */
 export async function blindSignMessage(message: string): Promise<string> {
   try {
     console.log('Начало создания слепой подписи');
     
-    // 1) Получить публичный ключ SPKI-PEM
     const response = await cryptoApi.getPublicKey();
     const pem = response.data.publicKey;
     console.log('Получен публичный ключ:', pem);
@@ -52,7 +41,6 @@ export async function blindSignMessage(message: string): Promise<string> {
     const spki = pemToSpki(pem);
     console.log('Ключ преобразован в SPKI формат');
 
-    // 2) Импортировать ключ в WebCrypto
     const publicKey = await crypto.subtle.importKey(
       "spki",
       spki,
@@ -62,30 +50,24 @@ export async function blindSignMessage(message: string): Promise<string> {
     );
     console.log('Ключ импортирован в WebCrypto');
 
-    // 3) Выбрать вариант PSS-подписи
     const suite = RSABSSA.SHA384.PSS.Randomized();
     console.log('Выбран вариант PSS-подписи');
 
-    // 4) Подготовить сообщение
     const encoder = new TextEncoder();
     const msgBytes = encoder.encode(message);
     const prepared = suite.prepare(msgBytes);
     console.log('Сообщение подготовлено');
 
-    // 5) Слепим
     const { blindedMsg, inv } = await suite.blind(publicKey, prepared);
     console.log('Создана слепая подпись');
 
-    // 6) Отправим на бэкенд
     const resp = await cryptoApi.sign({ blindedPublicKey: uint8ArrayToBase64(blindedMsg) });
     const blindSigBuf = base64ToUint8Array(resp.data.blindSignature);
     console.log('Получена подпись от сервера');
 
-    // 7) Снимем слепоту и получим окончательную подпись
     const signature = await suite.finalize(publicKey, prepared, blindSigBuf, inv);
     console.log('Снята слепота с подписи');
 
-    // 8) Проверим подпись
     const ok = await suite.verify(publicKey, signature, prepared);
     if (!ok) throw new Error("Проверка слепой подписи не удалась");
     console.log('Подпись успешно проверена');
@@ -99,14 +81,12 @@ export async function blindSignMessage(message: string): Promise<string> {
 
 export const encryptAnswer = async (answerId: string, publicKeyPem: string): Promise<string> => {
   try {
-    // Преобразуем PEM ключ в ArrayBuffer
     const pemContents = publicKeyPem
       .replace(/-----BEGIN PUBLIC KEY-----/, '')
       .replace(/-----END PUBLIC KEY-----/, '')
       .replace(/\s/g, '');
     const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
 
-    // Импортируем публичный ключ
     const publicKey = await crypto.subtle.importKey(
       'spki',
       binaryDer,
@@ -134,9 +114,6 @@ export const encryptAnswer = async (answerId: string, publicKeyPem: string): Pro
   }
 };
 
-/**
- * Получает доказательство с нулевым разглашением
- */
 export const getZKProof = async (votingId: string, userId: string): Promise<string> => {
   try {
     const response = await cryptoApi.getZeroKnowledgeProof(votingId);
@@ -147,9 +124,6 @@ export const getZKProof = async (votingId: string, userId: string): Promise<stri
   }
 };
 
-/**
- * Отправляет голос на сервер
- */
 export const submitVote = async (
   votingId: string,
   userId: string,
@@ -171,7 +145,6 @@ export const submitVote = async (
   }
 };
 
-// Функция для получения публичного ключа
 export const getPublicKey = async (): Promise<string> => {
   try {
     const response = await cryptoApi.getPublicKey();
@@ -182,7 +155,6 @@ export const getPublicKey = async (): Promise<string> => {
   }
 };
 
-// Функция для шифрования голоса
 export const encryptVote = (vote: string, publicKey: string): string => {
   try {
     // TODO: Реализовать шифрование ElGamal
@@ -193,7 +165,6 @@ export const encryptVote = (vote: string, publicKey: string): string => {
   }
 };
 
-// Функция для получения доказательства с нулевым разглашением
 export const getZeroKnowledgeProof = async (votingId: string): Promise<string> => {
   try {
     const response = await cryptoApi.getZeroKnowledgeProof(votingId);

@@ -52,7 +52,6 @@ const Login = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Фоновые элементы */}
         <Box
           sx={{
             position: 'absolute',
@@ -79,7 +78,6 @@ const Login = () => {
             zIndex: 0,
           }}
         />
-
         {/* Основной контент */}
         <Box
           sx={{

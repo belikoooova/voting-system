@@ -77,7 +77,6 @@ const Register = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Фоновые элементы */}
         <Box
           sx={{
             position: 'absolute',
@@ -105,7 +104,6 @@ const Register = () => {
           }}
         />
 
-        {/* Основной контент */}
         <Box
           sx={{
             position: 'relative',

@@ -115,7 +115,6 @@ const Onboarding = () => {
 
   return (
     <Container maxWidth="lg">
-      {/* Hero секция */}
       <Box
         sx={{
           minHeight: '90vh',
@@ -156,7 +155,6 @@ const Onboarding = () => {
           }}
         />
 
-        {/* Основной контент */}
         <Box
           sx={{
             position: 'relative',
@@ -245,7 +243,6 @@ const Onboarding = () => {
         </Box>
       </Box>
 
-      {/* Секция с информацией */}
       <Box
         ref={featuresRef}
         sx={{
